@@ -1,0 +1,49 @@
+=============================================================================
+         INSTRUCCIONS D'INSTAL·LACIÓ - QUANTITATIVE TRADING ASSISTANT
+=============================================================================
+
+Benvingut al Quantitative Trading Assistant. Aquests són els passos 
+necessaris per configurar el programari en un ordinador nou (Windows).
+
+1. REQUISITS PREVIS
+-------------------
+- Tenir instal·lat Python (versió 3.10 o superior): https://www.python.org/
+- Disposar d'una clau d'API de Google Gemini (podeu obtenir-ne una gratis a: 
+  https://aistudio.google.com/)
+
+2. DESCÀRREGA DEL PROJECTE
+--------------------------
+Si teniu Git instal·lat:
+   git clone https://github.com/ibelchi/swing_trading.git
+   cd swing_trading
+
+Si no teniu Git:
+   Descarregueu el fitxer ZIP des de GitHub i extraieu-lo en una carpeta.
+
+3. INSTAL·LACIÓ DE DEPENDÈNCIES
+-------------------------------
+Obriu una terminal (CMD o PowerShell) dins la carpeta del projecte i executeu:
+   pip install -r requirements.txt
+
+4. CONFIGURACIÓ DE L'API (MOLT IMPORTANT)
+-----------------------------------------
+- Al directori principal, trobareu un fitxer anomenat ".env".
+- Obriu-lo amb el Bloc de notes o el VS Code.
+- Busqueu la línia: GEMINI_API_KEY=tu_clau_de_gemini_aqui
+- Substituïu "tu_clau_de_gemini_aqui" per la vostra clau real (ex: AIzaSy...).
+- Guardeu el fitxer.
+
+5. COM EXECUTAR EL PROGRAMA
+---------------------------
+Teniu dues opcions:
+A) Feu doble clic al fitxer: run_app.bat
+B) O bé, des de la terminal, executeu: streamlit run app.py
+
+6. NOTA SOBRE ELS LÍMITS (RATE LIMITS)
+--------------------------------------
+Aquesta versió inclou una pausa de seguretat de 2 segons entre cada anàlisi 
+de la IA per evitar que Google bloquegi les peticions si useu el compte gratuït.
+
+Si yfinance triga a carregar les dades, espereu uns minuts i proveu de nou 
+(Yahoo Finance a vegades limita les IPs si es fan moltes crides seguides).
+=============================================================================
