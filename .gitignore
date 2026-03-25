@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# Streamlit
+.streamlit/
+
+# Project specific
+.env
+*.csv
+!tickers.csv
+test_*.py
+run_app.bat
+/tmp/
+
+# OS
+.DS_Store
+Thumbs.db

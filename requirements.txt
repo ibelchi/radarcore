@@ -1,0 +1,11 @@
+streamlit==1.42.0
+yfinance==0.2.54
+pandas==2.2.3
+numpy==2.2.3
+scipy==1.15.2
+fastdtw==0.3.4
+plotly==6.0.0
+google-genai
+openai==1.63.0
+python-dotenv==1.0.1
+pandas-datareader>=0.10.0
