@@ -2,7 +2,7 @@ import logging
 import pandas as pd
 from typing import Optional
 
-from src.data.ingestion import get_sp500_symbols, get_historical_data, get_company_info
+from src.data.ingestion import get_market_symbols, get_historical_data, get_company_info
 from src.database.db import SessionLocal, Opportunity, StrategyConfig
 from src.strategies.buy_the_dip import BuyTheDipStrategy
 
@@ -15,16 +15,17 @@ class MarketScanner:
             BuyTheDipStrategy()
         ]
         
-    def run_scan(self, limit_symbols: Optional[int] = None):
+    def run_scan(self, market: str = "sp500", limit_symbols: Optional[int] = None):
         """
-        Executa totes les estratègies actives sobre els símbols del S&P 500.
+        Executa totes les estratègies actives sobre els símbols del mercat adient.
+        :param market: Codi del mercat a escanejar.
         :param limit_symbols: Limitar el nombre d'accions a escanejar (útil per testejar)
         """
-        logger.info("Iniciant Market Scanner...")
-        symbols = get_sp500_symbols()
+        logger.info(f"Iniciant Market Scanner ({market})...")
+        symbols = get_market_symbols(market)
         
         if not symbols or len(symbols) == 0:
-            raise RuntimeError("L'escàner no ha estat capaç d'obtenir cap llistat base de símbols S&P500. Comproveu la vostra connexió a internet, dependències com `lxml`, o canvis estructurals a la pàgina de Wikipedia on s'extrauen.")
+            raise RuntimeError(f"L'escàner no ha estat capaç d'obtenir cap llistat base de símbols del mercat {market}. Comproveu l'origen de dades.")
             
         if limit_symbols:
             symbols = symbols[:limit_symbols]

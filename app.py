@@ -26,10 +26,10 @@ st.set_page_config(page_title="Assistent Anàlisi Inversió", layout="wide")
 st.title("📈 Assistent Personal d'Anàlisi d'Inversió (Swing Trading)")
 
 # --- TABS ---
-tab_scanner, tab_history, tab_config, tab_knowledge = st.tabs([
+tab_config, tab_scanner, tab_history, tab_knowledge = st.tabs([
+    "⚙️ Configuració d'Estratègies",
     "🔍 Market Scanner", 
     "📚 Historial i Informes", 
-    "⚙️ Configuració d'Estratègies",
     "🧠 Coneixement de l'Inversor (RAG)"
 ])
 
@@ -40,15 +40,27 @@ with tab_scanner:
     
     col1, col2 = st.columns([1, 4])
     with col1:
-        limit = st.number_input("Límit símbols (deixar 0 o buit per tot el S&P500)", min_value=0, max_value=505, value=0)
+        market_options = {
+            "S&P 500 (EUA)": "sp500",
+            "NASDAQ 100 (EUA)": "nasdaq100",
+            "IBEX 35 (Espanya)": "ibex35",
+            "DAX 40 (Alemanya)": "dax40",
+            "EuroStoxx 50 (Europa)": "eurostoxx50",
+            "Nikkei 225 (Japó)": "nikkei225",
+            "Nifty 50 (Índia)": "nifty50"
+        }
+        market_choice = st.selectbox("Mercat a Escanejar:", list(market_options.keys()))
+        market_key = market_options[market_choice]
+        
+        limit = st.number_input("Límit símbols (deixar 0 o buit per tot el mercat)", min_value=0, max_value=4000, value=0)
         start_btn = st.button("Executar Escàner", type="primary")
         
     with col2:
         if start_btn:
-            with st.spinner("Escanejant el mercat i avaluant estratègies... Això pot trigar una mica."):
+            with st.spinner(f"Escanejant el mercat {market_choice} i avaluant estratègies... Això pot trigar una mica."):
                 scanner = MarketScanner()
                 try:
-                    scanner.run_scan(limit_symbols=limit if limit > 0 else None)
+                    scanner.run_scan(market=market_key, limit_symbols=limit if limit > 0 else None)
                     st.success("Escaneig completat! Revisa l'Historial per veure si hi ha noves oportunitats detectades.")
                     st.balloons()
                 except Exception as e:
@@ -63,19 +75,29 @@ with tab_history:
         if not opportunities:
             st.info("De moment no s'ha detectat cap oportunitat al mercat.")
         else:
-            # Mostrar tabla resumen
+            # Mostrar tabla resumen amb enllaç a Yahoo Finance
             data = []
             for op in opportunities:
                 data.append({
                     "ID": op.id,
                     "Data": op.date_detected.strftime('%Y-%m-%d %H:%M'),
-                    "Símbol": op.symbol,
+                    "Símbol": f"https://es.finance.yahoo.com/quote/{op.symbol}/",
                     "Estratègia": op.strategy_name,
-                    "Preu": f"${op.current_price:.2f}"
+                    "Preu": f"${op.current_price:.2f}",
+                    "_symbol_real": op.symbol # Camp per buscar a la BD després
                 })
             
             df = pd.DataFrame(data)
-            st.dataframe(df, use_container_width=True)
+            st.dataframe(
+                df.drop(columns=["_symbol_real"]),
+                column_config={
+                    "Símbol": st.column_config.LinkColumn(
+                        "Símbol",
+                        display_text=r"https://es\.finance\.yahoo\.com/quote/(.*?)/"
+                    )
+                },
+                use_container_width=True
+            )
             
             st.divider()
             st.subheader("Generar Informe (IA)")
