@@ -18,7 +18,7 @@ class ReportGenerator:
             os.environ["GOOGLE_API_KEY"] = api_key
 
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash", 
+            model="gemini-2.5-flash", 
             temperature=0.2,
             api_key=api_key if api_key else None,
             google_api_key=api_key if api_key else None
