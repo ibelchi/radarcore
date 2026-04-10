@@ -52,6 +52,11 @@ with tab_scanner:
         market_choice = st.selectbox("Mercat a Escanejar:", list(market_options.keys()))
         market_key = market_options[market_choice]
         
+        if market_key in ["ibex35", "dax40", "eurostoxx50", "nifty50"]:
+            st.caption("ℹ️ Llista fixa interna per màxima estabilitat. Darrera revisió: **Abril 2026**.")
+        else:
+            st.caption("🟢 Escaneig **en directe** contra el directori d'internet.")
+            
         limit = st.number_input("Límit símbols (deixar 0 o buit per tot el mercat)", min_value=0, max_value=4000, value=0)
         start_btn = st.button("Executar Escàner", type="primary")
         
