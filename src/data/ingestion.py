@@ -89,12 +89,27 @@ def get_company_info(symbol: str) -> dict:
     try:
         ticker = yf.Ticker(symbol)
         info = ticker.info
+        # Mètriques fonamentals extres
+        earnings_date = info.get("nextEarningsDate")
+        if earnings_date:
+            try:
+                # Convertir timestamp a string llegible (YYYY-MM-DD)
+                earnings_str = pd.to_datetime(earnings_date, unit='s').strftime('%Y-%m-%d')
+            except:
+                earnings_str = "Unknown"
+        else:
+            earnings_str = "Unknown"
+
         return {
             "market_cap": info.get("marketCap", 0),
             "sector": info.get("sector", "Unknown"),
             "industry": info.get("industry", "Unknown"),
-            "short_name": info.get("shortName", symbol),
-            "currency": info.get("currency", "USD")
+            "short_name": info.get("short_name", symbol),
+            "currency": info.get("currency", "USD"),
+            "per": info.get("trailingPE", 0),
+            "eps": info.get("forwardEps", 0),
+            "dividend_yield": info.get("dividendYield", 0),
+            "next_earnings": earnings_str
         }
     except Exception as e:
         logger.error(f"Error obtenint informació de la companyia {symbol}: {e}")

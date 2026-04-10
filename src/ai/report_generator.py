@@ -36,56 +36,57 @@ class ReportGenerator:
         metrics = metrics or {}
         
         prompt = PromptTemplate.from_template("""
-Ets un analista professional de mercats especialitzat en swing trading.
+Ets un Expert Equity Analyst & Data Engineer especialitzat en swing trading.
 
-Analitza la següent oportunitat detectada automàticament per un sistema d'escaneig de mercat.
+La teva tasca és generar un informe d'anàlisi fonamental estructurat que acompanyi el senyal de trading detectat.
 
-DADES
+DADES DEL MERCAT ACTUALS (FRESCUES):
 Símbol: {symbol}
 Preu actual: {current_price}
 Màxim recent ({lookback_days} dies): {period_high}
 Mínim recent ({lookback_days} dies): {period_low}
-Caiguda des del màxim: {drop_pct} %
-Rebot des del mínim: {rebound_pct} %
-Capitalització de mercat: {market_cap} B USD
-Volum mitjà (10 dies): {volume} M accions
+Caiguda: {drop_pct}% | Rebot: {rebound_pct}%
+Capitalització: {market_cap} B USD
+Volum mitjà: {volume} M
+PER (Trailing): {per}
+EPS (Forward): {eps}
+Dividend Yield: {dividend_yield}%
+Propers Resultats: {next_earnings}
 
-Coneixement teòric proveït per l'usuari recuperat de la seva base de dades (RAG Context): 
+CONEIXEMENT TEÒRIC I CRITERIS DE L'USUARI (RAG):
 {user_knowledge}
 
 ---
+INSTRUCCIONS D'ESTRUCTURA:
+Genera l'informe exactament amb aquests punts (si falta una dada, posa "Dada no disponible"):
 
-INSTRUCCIONS
-Explica l'oportunitat de forma clara i estructurada.
-Has d'analitzar:
-* què ha passat recentment amb el preu
-* si el patró encaixa amb un "Buy the Dip"
-* quins riscos existeixen (usant també el RAG Context)
-* la qualitat del senyal detectat
+1. Resum Executiu i Puntuació:
+   - Fundamental Score: [0-100]
+   - Nivell de Risc Fonamental: [Baix / Mitjà / Alt / Crític]
+   - Tesi en una frase.
 
----
+2. Calendari de Riscos i Catalitzadors:
+   - Pròxims Earnings: [Data] (Alerta si és en < 7 dies).
+   - Data Ex-Dividend i Esdeveniments Macro de fons.
 
-FORMAT DE RESPOSTA
+3. Salut Financera i Valoració:
+   - EPS i PER vs Sector (usa el teu coneixement general per comparar).
+   - Deute/Patrimoni i Marges Operatius (avalua segons el teu coneixement del ticker).
 
-📊 Context de mercat
-(explicació del moviment recent del preu)
+4. Flux de "Diners Intel·ligents" (Subtil):
+   - Institutional Ownership, Insider Trading i Sentiment d'analistes (segons coneixement general).
 
-📉 Anàlisi del dip
-(explicació de la caiguda i el rebot)
+5. Context Sectorial:
+   - Força Relativa del Sector i Correlacions.
 
-⚠️ Factors de risc
-(llista de riscos potencials)
+6. Resum Final i Veredicte:
+   - Punts a favor i Punts en contra.
+   - Veredicte Fonamental: [APROVAT / CAUTELA / DESCARTAT].
 
-⭐ Qualitat del senyal
-(Feble / Moderat / Fort amb explicació)
-
-🧠 Conclusió de l'analista
-(resum breu de l'oportunitat en 2 o 3 frases)
-
----
-
-IMPORTANT
-L'anàlisi ha de ser clara, professional i breu. Respon en català.
+LÒGICA CRÍTICA:
+* Prioritat de dades: Si les dades actuals són dolentes (PER alt, EPS baix) malgrat el gràfic, sigues cautelós.
+* Si el context RAG diu que no vols invertir en aquesta empresa (llista negra), el veredicte ha de ser DESCARTAT.
+* Respon sempre en CATALÀ.
 """)
         
         formatted_prompt = prompt.format(
@@ -100,7 +101,11 @@ L'anàlisi ha de ser clara, professional i breu. Respon en català.
             drop_pct=round(metrics.get("drop_pct", 0), 2) if metrics.get("drop_pct") else "?",
             rebound_pct=round(metrics.get("rebound_pct", 0), 2) if metrics.get("rebound_pct") else "?",
             market_cap=round(metrics.get("market_cap", 0), 2) if metrics.get("market_cap") else "?",
-            volume=round(metrics.get("volume", 0), 2) if metrics.get("volume") else "?"
+            volume=round(metrics.get("volume", 0), 2) if metrics.get("volume") else "?",
+            per=metrics.get("per", "N/A"),
+            eps=metrics.get("eps", "N/A"),
+            dividend_yield=metrics.get("dividend_yield", "N/A"),
+            next_earnings=metrics.get("next_earnings", "N/A")
         )
         
         try:

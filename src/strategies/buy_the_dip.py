@@ -73,7 +73,11 @@ class BuyTheDipStrategy(StrategyBase):
             "rebound_pct": float(rebound_pct),
             "lookback_days": p["lookback_days"],
             "market_cap": float(market_cap),
-            "volume": float(avg_volume_10d)
+            "volume": float(avg_volume_10d),
+            "per": info_data.get("per", 0),
+            "eps": info_data.get("eps", 0),
+            "dividend_yield": info_data.get("dividend_yield", 0),
+            "next_earnings": info_data.get("next_earnings", "Unknown")
         }
         
         if drop_pct < p["min_drop_pct"]:
