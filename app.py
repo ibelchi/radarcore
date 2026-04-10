@@ -24,12 +24,6 @@ from src.ai.report_generator import ReportGenerator
 # --- CONFIGURACIÓ PÀGINA ---
 st.set_page_config(page_title="Assistent Anàlisi Inversió", layout="wide")
 st.title("📈 Assistent Personal d'Anàlisi d'Inversió (Swing Trading)")
-key_status = "✅ Carregada" if os.getenv("GOOGLE_API_KEY") else "❌ No trobada"
-st.sidebar.info(f"API Key: {key_status}")
-if os.getenv("GOOGLE_API_KEY"):
-    key = os.getenv("GOOGLE_API_KEY")
-    st.sidebar.write(f"Prefix: {key[:5]}...")
-    st.sidebar.write(f"Longitud: {len(key)} caràcters")
 
 # --- TABS ---
 tab_scanner, tab_history, tab_config, tab_knowledge = st.tabs([
