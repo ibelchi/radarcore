@@ -28,6 +28,7 @@ class Opportunity(Base):
     explanation = Column(Text, nullable=True)     # Generat per IA
     metrics = Column(JSON, nullable=True)         # Dades numèriques de la senyal
     market = Column(String(50), nullable=True)    # Índex on s'ha trobat (sp500, ibex35, etc)
+    currency = Column(String(10), nullable=True)  # Divisa (EUR, USD, etc)
 
 class StrategyConfig(Base):
     __tablename__ = 'strategy_configs'

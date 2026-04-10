@@ -93,7 +93,8 @@ def get_company_info(symbol: str) -> dict:
             "market_cap": info.get("marketCap", 0),
             "sector": info.get("sector", "Unknown"),
             "industry": info.get("industry", "Unknown"),
-            "short_name": info.get("shortName", symbol)
+            "short_name": info.get("shortName", symbol),
+            "currency": info.get("currency", "USD")
         }
     except Exception as e:
         logger.error(f"Error obtenint informació de la companyia {symbol}: {e}")

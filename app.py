@@ -92,6 +92,13 @@ with tab_history:
         else:
             # Mostrar tabla resumen amb enllaç a Yahoo Finance
             data = []
+            
+            # Helper per formatar moneda
+            def fmt_curr(price, curr_code):
+                symbols = {"EUR": "€", "USD": "$", "JPY": "¥", "INR": "₹", "GBP": "£"}
+                s = symbols.get(curr_code, curr_code or "$")
+                return f"{price:.2f} {s}"
+
             for op in opportunities:
                 data.append({
                     "ID": op.id,
@@ -99,7 +106,7 @@ with tab_history:
                     "Mercat": op.market.upper() if op.market else "S&P500",
                     "Símbol": f"https://es.finance.yahoo.com/quote/{op.symbol}/",
                     "Estratègia": op.strategy_name,
-                    "Preu": f"${op.current_price:.2f}",
+                    "Preu": fmt_curr(op.current_price, op.currency),
                     "_symbol_real": op.symbol # Camp per buscar a la BD després
                 })
             
