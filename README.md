@@ -6,15 +6,19 @@ An autonomous assistant designed to scan the stock market (S&P 500, NASDAQ 100, 
 
 * **Market Scanner:** Automatic scanning of technical conditions for filtering. Supports S&P 500, NASDAQ 100, IBEX 35, DAX 40, and more.
 * **Strategy System:** Plug-and-play architecture. Includes a configurable "Buy the Dip" strategy by default.
-* **AI Report Generation:** Combines calculated technical metrics with specific user knowledge (RAG) uploaded from PDFs using Google Gemini.
-* **Streamlit UI:** Automated SQLite database and an interactive, easy-to-use research dashboard.
-* **Historical Context:** Ability to evaluate rules against past price action for better decision making.
-* **Multi-Language Support:** Generate research reports in English, Spanish, or Catalan.
+* **AI Report Generation:** Multi-provider support. Generate research reports using either **Google Gemini** or **OpenAI (GPT-4o)**. 
+* **RAG Engine:** Personalize the AI with your own investment philosophy by uploading PDFs. 
+* **Streamlit UI:** Automated SQLite database and an interactive research dashboard with a dedicated "AI Configuration" sidebar.
+* **Smart Data:** Real-time company name lookup and rich technical metrics (drop, rebound, etc.) stored in the database.
+* **Multi-Language Support:** Full results in English, Spanish, or Catalan.
 
 ## Requirements
 
 * Python 3.9+
-* Google Gemini API Key (set as `GOOGLE_API_KEY` in `.env`).
+* API Key:
+    * **Google Gemini API Key** (for Gemini models).
+    * **OpenAI API Key** (for GPT models).
+    * *Set them in `.env` or input them directly into the UI.*
 
 ## Installation
 

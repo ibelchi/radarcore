@@ -6,7 +6,7 @@ class BuyTheDipStrategy(StrategyBase):
     
     @property
     def name(self) -> str:
-        return "Buy the Dip (Swing)"
+        return "Buy the Recovery (Swing)"
         
     @property
     def default_parameters(self) -> Dict[str, Any]:
@@ -101,7 +101,7 @@ class BuyTheDipStrategy(StrategyBase):
         result["confidence"] = round((conf_drop + conf_rebound) * 100, 2)
         
         result["reason"] = (
-            f"Buy the Dip opportunity detected in {symbol}. "
+            f"Buy the Recovery opportunity detected in {symbol}. "
             f"The value has fallen {drop_pct:.1f}% from its recent {p['lookback_days']}-day high (${period_high:.2f}). "
             f"Currently priced at ${current_price:.2f}, having rebounded {rebound_pct:.1f}% from the local low (${period_low:.2f}), validating the start of a recovery."
         )

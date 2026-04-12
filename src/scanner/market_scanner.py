@@ -61,6 +61,7 @@ class MarketScanner:
                             
                             op = Opportunity(
                                 symbol=sym,
+                                company_name=info_data.get("short_name") or sym,
                                 strategy_name=strategy.name,
                                 current_price=result.get("current_price"),
                                 strategy_config=config,

@@ -18,6 +18,7 @@ class Opportunity(Base):
     
     id = Column(Integer, primary_key=True)
     symbol = Column(String(10), nullable=False)
+    company_name = Column(String(100), nullable=True) # Nom descriptiu de l'empresa
     date_detected = Column(DateTime, default=datetime.utcnow)
     strategy_name = Column(String(50), nullable=False)
     current_price = Column(Float, nullable=False)

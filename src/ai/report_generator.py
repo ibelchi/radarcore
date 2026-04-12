@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 import logging
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from src.ai.rag_engine import RAGEngine
 
@@ -11,18 +12,35 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 class ReportGenerator:
-    def __init__(self):
-        # Try to get the key directly from the environment to be more robust
-        api_key = os.getenv("GOOGLE_API_KEY", "").strip()
-        if api_key:
-            os.environ["GOOGLE_API_KEY"] = api_key
+    def __init__(self, provider: str = "google", model_name: str = "gemini-1.5-flash", api_key: str = None):
+        """
+        Initializes the LLM report generator with multiple provider support.
+        :param provider: 'google' or 'openai'
+        :param model_name: Name of the model (e.g., 'gemini-1.5-flash' or 'gpt-4o')
+        :param api_key: Optional API key (overrides environment variable)
+        """
+        # If no key is provided, try to get it from environment
+        if not api_key:
+            if provider == "google":
+                api_key = os.getenv("GOOGLE_API_KEY", "").strip()
+            elif provider == "openai":
+                api_key = os.getenv("OPENAI_API_KEY", "").strip()
 
-        self.llm = ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash", 
-            temperature=0.2,
-            api_key=api_key if api_key else None,
-            google_api_key=api_key if api_key else None
-        )
+        if provider == "google":
+            self.llm = ChatGoogleGenerativeAI(
+                model=model_name, 
+                temperature=0.2,
+                google_api_key=api_key if api_key else None
+            )
+        elif provider == "openai":
+            self.llm = ChatOpenAI(
+                model=model_name,
+                temperature=0.2,
+                api_key=api_key if api_key else None
+            )
+        else:
+            raise ValueError(f"Unsupported AI provider: {provider}")
+
         self.rag = RAGEngine()
         
     def generate_report(self, symbol: str, strategy_name: str, tech_reason: str, current_price: float, metrics: dict = None, language: str = "English") -> str:

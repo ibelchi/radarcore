@@ -63,6 +63,24 @@ with st.sidebar:
         index=0,
         help="Select the language for the AI-generated research reports."
     )
+    
+    st.subheader("AI Configuration")
+    ai_provider = st.radio("AI Provider", ["Google Gemini", "OpenAI"], index=0)
+    
+    if ai_provider == "Google Gemini":
+        models = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"]
+        provider_key = "google"
+    else:
+        models = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"]
+        provider_key = "openai"
+        
+    ai_model = st.selectbox("Model", models, index=0)
+    
+    # Optional API Key override
+    with st.expander("API Key Settings (Optional)"):
+        user_api_key = st.text_input(f"Override {ai_provider} API Key", type="password")
+        if user_api_key:
+            st.caption(f"🔑 Specific {ai_provider} key will be used.")
 
 # --- TABS ---
 tab_config, tab_scanner, tab_history, tab_knowledge = st.tabs([
@@ -101,7 +119,7 @@ with tab_scanner:
         
     with col2:
         if start_btn:
-            with st.spinner(f"Scanning {market_choice} market... This may take a moment."):
+            with st.spinner(f"Scanning {market_choice} market... This may take a while"):
                 scanner = MarketScanner()
                 try:
                     scanner.run_scan(market=market_key, limit_symbols=limit if limit > 0 else None)
@@ -138,22 +156,50 @@ with tab_history:
                 s = symbols.get(curr_code, curr_code or "$")
                 return f"{price:.2f} {s}"
 
-            for op in opportunities:
                 data.append({
                     "ID": op.id,
                     "Date": op.date_detected.strftime('%Y-%m-%d %H:%M'),
                     "Market": op.market.upper() if op.market else "S&P500",
                     "Symbol": f"https://es.finance.yahoo.com/quote/{op.symbol}/",
+                    "Company": op.company_name or op.symbol,
                     "Strategy": op.strategy_name,
                     "Price": fmt_curr(op.current_price, op.currency),
-                    "_symbol_real": op.symbol # Used for database lookups
+                    "_symbol_real": op.symbol, # Used for database lookups
+                    "_drop": op.metrics.get("drop_pct", 0) if op.metrics else 0,
+                    "_rebound": op.metrics.get("rebound_pct", 0) if op.metrics else 0,
+                    "_lookback": op.metrics.get("lookback_days", 0) if op.metrics else 0
                 })
             
             df = pd.DataFrame(data)
+            
+            # CSV Export Logic
+            csv_df = df.copy()
+            csv_df = csv_df.rename(columns={
+                "Date": "Date Detected",
+                "Market": "Market",
+                "Symbol": "Ticker",
+                "Company": "Company Name",
+                "Strategy": "Strategy",
+                "Price": "Price at Signal",
+                "_drop": "Drop (%)",
+                "_rebound": "Rebound (%)",
+                "_lookback": "Lookback Days"
+            })
+            # Clean ticker for CSV (remove the full URL)
+            csv_df["Ticker"] = csv_df["_symbol_real"]
+            csv_data = csv_df.drop(columns=["ID", "_symbol_real"]).to_csv(index=False).encode('utf-8')
+            
+            st.download_button(
+                label="📥 Download Full History (CSV)",
+                data=csv_data,
+                file_name="investment_history.csv",
+                mime="text/csv"
+            )
+
             df = df.sort_values(by="Symbol") # Alphabetical sorting
             
             st.dataframe(
-                df.drop(columns=["_symbol_real"]),
+                df.drop(columns=["ID", "_symbol_real", "_drop", "_rebound", "_lookback"]),
                 column_config={
                     "ID": None,  # Hide ID column
                     "Symbol": st.column_config.LinkColumn(
@@ -193,10 +239,22 @@ with tab_history:
                                         "per": info.get("per", "N/A"), "eps": info.get("eps", "N/A"),
                                         "dividend_yield": info.get("dividend_yield", "N/A"), "next_earnings": info.get("next_earnings", "N/A")
                                     }
-                                    gen = ReportGenerator()
+                                    gen = ReportGenerator(
+                                        provider=provider_key, 
+                                        model_name=ai_model, 
+                                        api_key=user_api_key if user_api_key else None
+                                    )
                                     report = gen.generate_report(manual_ticker, "Direct Search", "User Request", curr_p, metrics, language=report_lang)
+                                    
+                                    # Save to reports/ folder
+                                    os.makedirs("reports", exist_ok=True)
+                                    filename = f"reports/investment_report_{manual_ticker}_{pd.Timestamp.now().strftime('%y%m%d')}.md"
+                                    with open(filename, "w", encoding="utf-8") as f:
+                                        f.write(report)
+                                    
                                     st.session_state['manual_report'] = report
                                     st.session_state['manual_ticker_status'] = manual_ticker
+                                    st.session_state['manual_report_file'] = filename
                             except Exception as e:
                                 st.error(f"Error: {e}")
 
@@ -216,8 +274,19 @@ with tab_history:
                             with st.status(f"Analyzing {sym}...", expanded=True) as status:
                                 op = db.query(Opportunity).filter(Opportunity.symbol == sym).order_by(Opportunity.date_detected.desc()).first()
                                 if op:
-                                    gen = ReportGenerator()
+                                    gen = ReportGenerator(
+                                        provider=provider_key, 
+                                        model_name=ai_model, 
+                                        api_key=user_api_key if user_api_key else None
+                                    )
                                     report_content = gen.generate_report(op.symbol, op.strategy_name, op.explanation, op.current_price, op.metrics, language=report_lang)
+                                    
+                                    # Save each individually to reports/
+                                    os.makedirs("reports", exist_ok=True)
+                                    fname = f"reports/investment_report_{op.symbol}_{pd.Timestamp.now().strftime('%y%m%d')}.md"
+                                    with open(fname, "w", encoding="utf-8") as f:
+                                        f.write(report_content)
+                                        
                                     st.markdown(f"### Report: {sym}")
                                     st.markdown(report_content)
                                     all_reports += f"# MARKET REPORT: {sym}\n\n{report_content}\n\n---\n\n"
@@ -239,7 +308,7 @@ with tab_history:
                     st.download_button(
                         label=f"📥 Download {st.session_state['manual_ticker_status']} Report",
                         data=st.session_state['manual_report'],
-                        file_name=f"report_{st.session_state['manual_ticker_status']}.md",
+                        file_name=f"investment_report_{st.session_state['manual_ticker_status']}_{pd.Timestamp.now().strftime('%y%m%d')}.md",
                         mime="text/markdown"
                     )
     finally:
