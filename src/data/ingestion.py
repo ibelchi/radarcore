@@ -104,7 +104,7 @@ def get_company_info(symbol: str) -> dict:
             "market_cap": info.get("marketCap", 0),
             "sector": info.get("sector", "Unknown"),
             "industry": info.get("industry", "Unknown"),
-            "short_name": info.get("short_name", symbol),
+            "short_name": info.get("shortName") or info.get("longName") or symbol,
             "currency": info.get("currency", "USD"),
             "per": info.get("trailingPE", 0),
             "eps": info.get("forwardEps", 0),

@@ -57,22 +57,13 @@ st.markdown("""
 # --- SIDEBAR: SETTINGS ---
 with st.sidebar:
     st.header("Global Settings")
-    report_lang = st.selectbox(
-        "AI Report Language",
-        ["Catalan", "Spanish", "English"],
-        index=0,
-        help="Select the language for the AI-generated research reports."
-    )
-    
     st.subheader("AI Configuration")
     ai_provider = st.radio("AI Provider", ["Google Gemini", "OpenAI"], index=0)
     
     if ai_provider == "Google Gemini":
         models = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"]
-        provider_key = "google"
     else:
         models = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"]
-        provider_key = "openai"
         
     ai_model = st.selectbox("Model", models, index=0)
     
@@ -81,6 +72,15 @@ with st.sidebar:
         user_api_key = st.text_input(f"Override {ai_provider} API Key", type="password")
         if user_api_key:
             st.caption(f"🔑 Specific {ai_provider} key will be used.")
+
+    st.divider()
+
+    report_lang = st.selectbox(
+        "AI Report Language",
+        ["Catalan", "Spanish", "English"],
+        index=0,
+        help="Select the language for the AI-generated research reports."
+    )
 
 # --- TABS ---
 tab_config, tab_scanner, tab_history, tab_knowledge = st.tabs([
