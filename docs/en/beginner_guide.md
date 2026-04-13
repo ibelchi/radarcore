@@ -1,62 +1,64 @@
 # RadarCore: Investment Guide (Concepts & Practice)
 
-Welcome to **RadarCore**. This manual is designed to take you from a complete beginner to understanding how our virtual assistant works. We do not hide how the program works; we will teach you the underlying math, but doing so with real-world examples.
+Welcome to **RadarCore**. This manual will help you understand how the **Buy the Recovery** strategy works and how you can use this software to learn about finance and swing trading from scratch.
 
 ---
 
-## 1. Fundamental Concepts
-RadarCore does not predict the future. It utilizes a strategy called **Swing Trading** based on "Mean Reversion" (also known as Buy the Dip).
+## 1. What is the "Buy the Recovery" Strategy?
 
-What does that mean? When a strong, healthy company drops abruptly in price due to generalized panic or a temporary bad news cycle, it tends to "rebound" until it recovers its real value.
+Historically, many people have heard the term "Buy the Dip". In RadarCore, we call it **Buy the Recovery** because it is more precise: we don't buy when the stock is actively crashing (a "falling knife"), but when it has already found a floor and has starting to recover.
 
-### The Price Cycle
-- **Peak / High**: The highest price a buyer has paid for a stock in recent months.
-- **Bottom / Low / Pivot**: The floor. The exact moment everyone stops selling and the first people start buying back.
-- **Breakout**: The moment the stock confirms it is genuinely rising.
+The goal is to take advantage of the fact that the price tends to return to its average after a temporary setback.
 
 ---
 
-## 2. How RadarCore Calculates an Opportunity (The Math)
+## 2. Before Starting: Configuring the Scanner
 
-RadarCore uses **three pillars** before recommending a stock to you. All mathematics are programmed in pure percentages so they automatically scale whether the stock is $10 or $1,000.
+When you configure the scanner, you see a series of parameters. Here is what they mean in plain language:
 
-### Pillar A: The Real Drop (Drop %)
-The program looks for discounts (sales). If a stock was at $100 and fell all the way to $80, it has dropped 20%.
-> **Mathematical Formula**: `((Period High Price - Minimum Price) / Period High Price) * 100`
-
-### Pillar B: Rebound Confirmation (Rebound %)
-RadarCore *never* recommends buying while the stock is actively crashing (that is known as "catching a falling knife"). It waits to see that from the floor (Minimum), the stock has started going back up (a minimum of 2%).
-> **Mathematical Formula**: `((Current Price - Minimum Price) / Minimum Price) * 100`
-
-### Pillar C: The "Pattern" (The Chart's Shape)
-RadarCore looks at the history of the price drop and classifies it:
-* **L-BASE**: The stock dropped and has spent the last 10-15 days mostly moving sideways in a flat line. Mathematically: `Accumulated range < 8% over 10 days`. This usually means the big institutional funds (the rich) are quietly buying the stock back up ("accumulating"). THIS IS THE SAFEST PATTERN.
-* **V-RECOVERY**: The stock falls and violently bounces right back. Mathematically: `Rebound > 5% very fast`. This is explosive but far more unstable to trade.
+*   **Lookback Days**: This is how far back we look at the past to find the stock's highest price point. If you set 60 days, we look for the "Record" price of those 2 months to compare it with today's price.
+*   **Min Drop %**: How much of a "discount" you want the stock to have before notifying you. If you set 15%, we only look for companies that have fallen at least 15% from their 60-day high.
+*   **Min Rebound %**: This is the confirmation that we are no longer falling. If you set 2%, you want the stock to have already risen 2% from its lowest point.
+*   **Symbol Limit**: How many companies in the market you want to analyze (0 to analyze them all, but it will take longer).
 
 ---
 
-## 3. The Market Context: Systemic vs Idiosyncratic
+## 3. How is "Confidence" Calculated?
 
-RadarCore is smart, meaning it compares the drop of your single stock against the entire American Stock Market (The S&P 500 Index).
+The confidence score (1-100%) you see for each opportunity is not black magic; it's the sum of scores according to four factors:
 
-* **Market falls, Stock falls (Systemic)**: S&P 500 falls 10%, and your stock falls 12%. RadarCore subtracts it: `12% - 10% = 2% anomaly`. If it's below 5%, the App will tell you `"⚠️ Systemic Drop"`. Your company is likely completely fine, it's just the entire global market panicking. These take longer to recover.
-* **Market rises, Stock falls (Idiosyncratic)**: The S&P 500 is going up, but your specific stock crashes. The App will tell you `"✅ Idiosyncratic Drop"`. This is the best situation! It means the stock can recover entirely on its own very fast because the rest of the world economy is doing fine.
-
-The "Confidence" metric (1-100%) you see is calculated by summing points: The quality of the drop + Is it an L-BASE? + Is it an Idiosyncratic Drop?
+1.  **Drop Quality (30%)**: The closer the stock is to having fallen 40-50%, the more confidence the program has that there is a large return path.
+2.  **Rebound Quality (20%)**: If the rebound is solid (between 5% and 10%), the program has more confidence that the recovery has already begun.
+3.  **The Chart Pattern (25%)**:
+    *   **L-BASE**: Wins the maximum confidence points. It means the price has stayed sideways, almost not moving for days. This suggests that big institutional investors are quietly "accumulating" the stock.
+    *   **V-RECOVERY**: Wins fewer confidence points because it is a very fast and violent rise that tends to be more unstable.
+4.  **Market Context (25%)**: If your stock has fallen for its own reasons while the entire market is rising (**Idiosyncratic Drop**), the program has more confidence in its solo recovery.
 
 ---
 
-## 4. Practical Case Step-By-Step
+## 4. Key Financial Concepts
 
-Imagine you are using RadarCore right now. What should you do?
+### Stop Loss (SL)
+This is your **safety handbrake**. Imagine you buy a stock at $10. If suddenly the company continues to do poorly, the Stop Loss is an order that tells your bank: "If the stock drops back to $9, sell it immediately."
+*   **What is it for?** Because if the company goes bankrupt, you will have only lost $1 (from 10 to 9), but you will have saved yourself from losing all $10. RadarCore marks this line in red on the charts.
 
-1. **Scan (The Scanner)**: Click "Run Scanner". RadarCore reads the entire US market looking for "Buy the Dip" discounts.
-2. **Read the Table (History)**: You see a company (ex: TSLA).
-   - "Drop": 25% (It's a quarter cheaper!).
-   - "Rebound": 4% (Perfect, the knife hit the floor and it's bouncing).
-   - "Pattern": L-BASE (High safety).
-3. **Check the Visual Chart**: Open it up. You'll see Target 1 (T1) outlined at 85% of the recovery height. That is your first major take-profit target.
-4. **Protect Yourself (Stop Loss - SL)**: Look at the red dashed line at the bottom. If you buy the stock, log into your banking app and set an automatic "Stop Loss" so if the price hits that red line again, you sell automatically. You take a small 5% loss to save yourself from losing everything. **Never trade without a Stop Loss!**
+### Targets (T1 and T2)
+These are your "sell goals" where you collect profits.
+*   **T1 (Conservative Target)**: Is a halfway recovery point (usually marked at 85% approximation to the previous high). This is where you might decide to sell half to lock in quick profits.
+*   **T2 (Ideal Target)**: This is when the stock returns exactly to the peak price it had before falling. This is where the "Buy the Recovery" strategy is successfully completed.
 
-## The Absolute Golden Rule for Beginners
-It does not matter if a stock says "Confidence 99%". The CEO could get arrested tomorrow and the stock would plummet. Never invest all your money into 1 single RadarCore stock. Always divide it by 10 different companies. That is called **Diversifying your Risk**.
+### Reference Markets (The S&P 500 Case)
+Even though you can scan the Spanish IBEX 35 or the German DAX, the program always uses the "American Market" (**SPY / S&P 500**) as a global reference. Why? Because if the American market falls hard, it is very difficult for any stock in any other market to rise healthily. It serves as a thermometer to know if your company's crash is an isolated case or if the whole world is in crisis.
+
+---
+
+## 5. Practical Case: Interpreting Charts
+
+When you open a Plotly chart in RadarCore, look for these 3 colors:
+
+1.  **The Red Zone**: This is the period when the stock was in free fall. The **Red Triangle** marks where it started (the high).
+2.  **The Yellow Triangle**: This is the **Pivot**. The moment the fall stopped and the stock decided it wouldn't go any lower.
+3.  **The Green Zone**: This is the recovery phase we are trying to take advantage of. Our goal is to move up from the yellow triangle towards the **Green Dashed Line (T2)**.
+
+## Golden Rule: Diversification
+Never put all your savings into a single stock, no matter how much "Confidence" the program has. The correct strategy involves having, for example, 10 different trades at the same time. This way, if one goes wrong and the **Stop Loss** is triggered, the other 9 can continue their course towards **T2** and give you an overall profit.

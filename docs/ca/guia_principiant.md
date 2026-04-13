@@ -1,62 +1,64 @@
 # RadarCore: Guia d'Inversió (Conceptes i Pràctica)
 
-Benvingut a **RadarCore**. Aquest manual està dissenyat per portar-te des de zero fins a entendre com funciona el nostre assistent virtual. No amaguem com el programa pren les decisions; te n'ensenyarem la matemàtica, però amb exemples del món real.
+Benvingut a **RadarCore**. Aquest manual t'ajudarà a entendre com funciona l'estratègia **Buy the Recovery** (Comprar la Recuperació) i com pots utilitzar aquest programari per aprendre sobre finances i swing trading des de zero.
 
 ---
 
-## 1. Conceptes Fonamentals
-El RadarCore no endevina el futur. Utilitza una estratègia que s'anomena **Swing Trading** basada en la "Reversió a la Mitjana" (Buy the Dip o Comprar la Caiguda).
+## 1. Què és l'estratègia "Buy the Recovery"?
 
-Què vol dir això? Quan una empresa sana i forta cau bruscament de preu per pànic general o una mala notícia temporal, tendeix a "rebotar" fins a recuperar el seu valor real.
+Històricament, molta gent ha sentit l'expressió "Buy the Dip" (comprar la caiguda). A RadarCore la anomenem **Buy the Recovery** perquè és més precisa: no comprem quan l'acció baixa (un "ganivet que cau"), sinó quan ja ha trobat un terra i comença a recuperar-se.
 
-### El Cicle del Preu
-- **Màxim (High)**: El preu més alt al qual s'ha pagat una acció en els últims mesos.
-- **Mínim (Low) / Pivot**: El fons. El moment on tothom deixa de vendre i les primeres persones tornen a comprar.
-- **Trencament (Breakout)**: El moment en què l'acció confirma que realment està pujant.
+L'objectiu és aprofitar que el preu tendeix a tornar a la seva mitjana després d'un ensurt temporal.
 
 ---
 
-## 2. Com Calcula RadarCore una Oportunitat? (Les Matemàtiques)
+## 2. Abans de començar: Configurant l'Escàner
 
-RadarCore utilitza **tres pilars** abans de recomanar-te una acció. Tota la matemàtica està programada en percentatges perquè sigui aplicable tant a una acció de 10$ com a una de 1000$.
+Quan configures l'escàner, veus una sèrie de paràmetres. Aquí tens què signifiquen en llenguatge planer:
 
-### Pilar A: La Caiguda Real (Drop %)
-El programa busca un descompte (rebaixes). Si una acció valia 100$ i cau fins a 80$, ha fet una caiguda del 20%.
-> **Fórmula matemàtica**: `((Preu Màxim - Preu Mínim) / Preu Màxim) * 100`
-
-### Pilar B: La Confirmació del Rebot (Rebound %)
-RadarCore *mai* compra cap acció mentre està caient (això és com intentar atrapar un ganivet caient). Espera a veure que des del fons (Mínim), l'acció ja ha començat a pujar una mica (un mínim del 2%).
-> **Fórmula matemàtica**: `((Preu Actual - Preu Mínim) / Preu Mínim) * 100`
-
-### Pilar C: El "Pattern" (La Forma del Gràfic)
-El RadarCore observarà l'historial del preu i el classificarà:
-* **L-BASE**: L'acció ha caigut i porta 10 o 15 dies gairebé sense moure's en un racó. Matemàticament: `Rang acumulat < 8% durant més de 10 dies`. Això significa que els grans fons institucionals (els rics) estan acumulant l'acció a poc a poc sense fer soroll. ÉS EL PATRÓ MÉS SEGUR.
-* **V-RECOVERY**: Cau i rebota bruscament. Matemàticament: `Rebound > 5% en pocs dies`. És més ràpid, però més inestable.
+*   **Lookback Days (Dies de recerca)**: És quant de temps enrere mirem el passat per buscar el punt més alt de l'acció. Si poses 60 dies, busquem el "Rècord" de preu d'aquells 2 mesos per comparar-lo amb el preu d'avui.
+*   **Min Drop % (Caiguda mínima)**: Quant "descompte" vols que tingui l'acció abans d'avisar-te. Si poses 15%, només busquem empreses que hagin caigut almenys un 15% des del seu màxim de 60 dies.
+*   **Min Rebound % (Rebot mínim)**: És la confirmació de que ja no estem caient. Si poses 2%, vols que l'acció ja hagi pujat un 2% des del seu punt més baix.
+*   **Symbol Limit**: Quantes empreses del mercat vols analitzar (0 per analitzar-les totes, però trigarà més).
 
 ---
 
-## 3. El Context del Mercat: Sistèmic vs Idiosincràtic
+## 3. Com es calcula la "Confidence" (Confiança)?
 
-RadarCore és intel·ligent i compara la caiguda de la teva acció amb la del mercat sencer (L'índex S&P 500, que engloba les 500 empreses més grans dels EUA).
+La nota de confiança (1-100%) que veus a cada oportunitat no és màgia negra; és la suma de la punts segons quatre factors:
 
-* **Cau el Mercat i cau l'Acció (Sistèmica)**: L'S&P 500 cau un 10%, i la teva acció cau un 12%. El RadarCore ho analitza restant-ho: `12% - 10% = 2% d'estranya`. Si és inferior al 5%, l'App et dirà `"⚠️ Caiguda Sistèmica"`. No hi ha cap problema amb l'empresa, simplement tot el mercat està en crisi. Tarda més a recuperar-se.
-* **El Mercat puja però l'Acció cau (Idiosincràtica)**: L'S&P 500 puja, però la teva acció cau temporalment. L'App et dirà `"✅ Caiguda Idiosincràtica"`. Aquesta és la millor situació! Indica que pot recuperar-se ràpid en solitari sense dependre dels inversors globals.
-
-La "Confiança" (1-100%) que et dóna el RadarCore es calcula sumant punts d'aquests factors: Quina és la qualitat de la caiguda + És una L-BASE? + És Idiosincràtic?
+1.  **Qualitat de la Caiguda (30%)**: Com més a prop estigui l'acció d'haver caigut un 40-50%, més confiança té el programa de que hi ha un gran recorregut de tornada.
+2.  **Qualitat del Rebot (20%)**: Si el rebot és sòlid (entre un 5 i un 10%), el programa té més confiança en que la recuperació ja ha començat.
+3.  **El Patró de Gràfic (25%)**:
+    *   **L-BASE**: Guanya el màxim de punts. Significa que el preu s'ha quedat lateral, gairebé sense moure's en un racó durant dies. Això suggereix que els grans inversors rics estan "acumulant" la teva acció sense fer soroll.
+    *   **V-RECOVERY**: Guanya menys punts de confiança perquè és una pujada molt ràpida i violenta que sol ser més inestable.
+4.  **Context de Mercat (25%)**: Si la teva acció ha caigut per motius propis mentre el mercat sencer puja (**Caiguda Idiosincràtica**), el programa té més confiança en la seva recuperació solitària.
 
 ---
 
-## 4. Cas Pràctic: Passos en una Partida de RadarCore
+## 4. Conceptes Financers Clau
 
-Imagina que ets a la plataforma. Què has de fer?
+### Stop Loss (SL)
+És el teu **fre de mà de seguretat**. Imagina que compres una acció a 10$. Si de sobte l'empresa segueix anant malament, l'Stop Loss és una ordre que diu al teu banc: "Si l'acció torna a baixar fins a 9$, ven-la immediatament". 
+*   **Per què serveix?** Perquè si l'empresa fa fallida, tu només hauràs perdut l'1$ (del 10 al 9), però t'hauràs salvat de perdre els 10$. El RadarCore et marca aquesta línia en vermell als gràfics.
 
-1. **Escanejar (Scanner)**: Prem el botó "Run Scanner". RadarCore llegirà tota la borsa americana i descarregarà dades per trobar oportunitats "Buy the Dip".
-2. **Llegir la Taula (History)**: Veus una empresa (ex: TSLA).
-   - "Drop": 25% (Està a un quart de descompte).
-   - "Rebound": 4% (Perfecte, el ganivet ja està a terra i estem a l'alça).
-   - "Pattern": L-BASE (Més seguretat).
-3. **Analitzar el Gràfic**: Obre'l. Veuràs el Target 1 (T1) calculat al 85% de la recuperació. Aquest és el teu primer objectiu de guany.
-4. **Protegeix-te (Stop Loss - SL)**: Fixa't en la línia vermella. Si compres avui l'acció, has de configurar en el teu banc o xarxa que si el preu torna a baixar cap aquella línia vermella (el "Pivot"), venguis automàticament. Assumeixes una pèrdua petita (potser d'un 5%) per evitar perdre el gran capital. **Mai inverteixis sense un Stop Loss**.
+### Targets o Objectius (T1 i T2)
+Són les teves "metes de venda" on reculls els guanys.
+*   **T1 (Objectiu Conservador)**: És un punt mig de recuperació (habitualment marcat al 85% d'aproximació al màxim anterior). És on pots decidir vendre la meitat per assegurar beneficis ràpids.
+*   **T2 (Objectiu Ideal)**: És el moment en què l'acció torna exactament al preu màxim que tenia abans de caure. És on l'estratègia "Buy the Recovery" es completa amb èxit total.
 
-## Regla d'Or pel Novell
-No importa si la "Confidence" és del 99%. L'empresa pot tenir una mala notícia i quebrar l'endemà. Mai inverteixis tots els teus diners en 1 oportunitat del RadarCore, divideix-ho en 10. Això s'anomena **Risc Diversificat**.
+### Mercats de Referència (El cas de l'S&P 500)
+Encara que pots escanejar l'IBEX 35 espanyol o el DAX alemany, el programa sempre fa servir el "Mercat Americà" (**SPY / S&P 500**) com a referència global. Per què? Perquè si la borsa americana cau fort, és molt difícil que qualsevol acció de qualsevol altre mercat pugi de forma sana. Ens serveix de termòmetre per saber si la caiguda de la teva empresa és un cas aïllat o si és el món sencer el que està en crisi.
+
+---
+
+## 5. Cas Pràctic: Interpretant els Gràfics
+
+Quan obris un gràfic de Plotly al RadarCore, busca aquests 3 colors:
+
+1.  **La Zona Vermella**: És el període on l'acció estava en caiguda lliure. El **Triangle Vermell** marca on va començar (el màxim).
+2.  **El Triangle Groc**: És el **Pivot**. El moment on la caiguda es va aturar i l'acció va decidir que ja no baixaria més.
+3.  **La Zona Verda**: És la fase de recuperació que estem intentant aprofitar. El nostre objectiu és anar pujant des del groc fins a la **Línia Verda Discontínua (T2)**.
+
+## Regla d'Or: Diversificació
+Mai posis tots els teus estalvis en una sola acció, per molta "Confidence" que tingui el programa. L'estratègia correcta consisteix a tenir, per exemple, 10 operacions diferents a la vegada. Així, si una et surt malament i salta l'**Stop Loss**, les altres 9 poden seguir el seu curs cap al **T2** i donar-te beneficis globals.
