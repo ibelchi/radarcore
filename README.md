@@ -24,7 +24,7 @@ An autonomous assistant designed to scan the stock market (S&P 500, NASDAQ 100, 
 
 ```bash
 git clone https://github.com/ibelchi/swing_trading.git
-cd investment_assistant
+cd radarcore
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
@@ -42,7 +42,20 @@ pip install -r requirements.txt
    *Alternatively, use the `Start_Assistant.bat` shortcut on Windows.*
 
 ## User Documentation
-- [RAG Instructions](file:///c:/Users/Belchi/.gemini/antigravity/scratch/investment_assistant/RAG_INSTRUCTIONS.md): Learn how to personalize the AI with your own investment philosophy.
+
+### 📘 Fundamentals & Strategy (Investment Manuals)
+Learn how RadarCore thinks and make better investment decisions:
+
+**🇬🇧 English:**
+- [Beginner's Guide (Start Here)](docs/en/beginner_guide.md): Learn Swing Trading basics and how to use the algorithm safely.
+- [Expert Reference](docs/en/expert_reference.md): Pure mathematical specifications, pattern logic, and alpha generation formulas.
+
+**🇪🇸/🇦🇩 Catalan:**
+- [Guia d'Inversió (Principiants)](docs/ca/guia_principiant.md): Aprèn conceptes bàsics de Swing Trading pas a pas sense por.
+- [Especificació Tècnica (Experts)](docs/ca/referencia_expert.md): Arquitectura paramètrica, reconeixement de patrons i les matemàtiques darrere les decisions.
+
+### ⚙️ AI Customization
+- [RAG Instructions](RAG_INSTRUCTIONS.md): Learn how to personalize the AI with your own PDF investment philosophy.
 
 ## Future Roadmap
 - **Advanced Backtesting:** Full historical simulation module to validate strategies over multi-year periods.
