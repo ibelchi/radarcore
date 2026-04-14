@@ -12,7 +12,7 @@ L'estratègia orquestrada al mòdul `src/strategies/buy_the_dip.py` identifica p
 *   **Lookback Days**: Finestra temporal (N) de context per al càlcul del valor `MAX(High)`.
 *   **Min Drop %**: Filtre de significança de la caiguda relativa `(High - Low) / High`.
 *   **Min Rebound %**: Filtre de confirmació d'impuls des del pivot `(Current - Low) / Low`.
-*   **Filtres de Liquitat**: Requereix `Market Cap > 10B` i `Volume > 1M` per garantir l'arbitratge.
+*   **Filtres de Liquitat**: Requereix `Market Cap > 2B` i `Volume > 0.5M` per garantir l'arbitratge i acceptar mid-caps europees.
 
 ---
 

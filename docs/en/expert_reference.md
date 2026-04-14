@@ -12,7 +12,7 @@ The strategy orchestrated in the `src/strategies/buy_the_dip.py` module identifi
 *   **Lookback Days**: Dynamic time window (N) for calculating the `MAX(High)` reference point.
 *   **Min Drop %**: Significance filter for the relative drawdown: `(High - Low) / High`.
 *   **Min Rebound %**: Impulse confirmation filter from the technical floor: `(Current - Low) / Low`.
-*   **Liquidity Filters**: Requires `Market Cap > 10B` and `Volume > 1M` to ensure high-quality arbitrage potential.
+*   **Liquidity Filters**: Requires `Market Cap > 2B` and `Volume > 0.5M` to allow for European mid-cap analysis and ensure high-quality arbitrage potential.
 
 ---
 
