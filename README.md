@@ -2,13 +2,13 @@
   <img src="assets/logo.png" width="120" alt="radarcore logo">
 </p>
 
-# radarcore (scan for Swing Trading opportunities)
+# radarcore (Swing Trading Intelligence)
 
 ## Features
 
 * **Market Scanner:** Automatic scanning of technical conditions for filtering. Supports S&P 500, NASDAQ 100, IBEX 35, DAX 40, and more.
 * **Anti-Blocking Architecture:** Industrial-grade data ingestion with persistent connections, rate-limit (HTTP 429) detection, exponential backoff, and dual-layer fetch fallbacks to prevent IP bans from Yahoo Finance.
-* **Strategy System:** Plug-and-play architecture. Includes a configurable "Buy the Dip" strategy by default with European market-friendly defaults.
+* **Strategy System:** Plug-and-play architecture. Includes a configurable "Buy the Recovery" strategy by default with European market-friendly defaults.
 * **AI Report Generation:** Multi-provider support. Generate research reports using either **Google Gemini** or **OpenAI (GPT-4o)**. 
 * **RAG Engine:** Personalize the AI with your own investment philosophy by uploading PDFs. 
 * **Streamlit UI:** Automated SQLite database and an interactive research dashboard with real-time heartbeat scanner feedback and stable selection persistence.
@@ -50,18 +50,15 @@ pip install -r requirements.txt
 Learn how RadarCore thinks and make better investment decisions:
 
 **🇬🇧 English:**
-- [Beginner's Guide (Start Here)](docs/en/beginner_guide.md): Learn Swing Trading basics and how to use the algorithm safely.
-- [Expert Reference](docs/en/expert_reference.md): Technical bucket architecture, pattern logic, and alpha generation formulas.
-- [RAG Instructions](RAG_INSTRUCTIONS.md): Personalize the AI with your own PDF investment philosophy.
+- [**Beginner's Guide (Start Here)**](docs/en/beginner_guide.md): Learn Swing Trading basics and how to use the algorithm safely.
+- [RAG Instructions](docs/en/rag_instructions.md): Personalize the AI with your own PDF investment philosophy.
 
-**🇪🇸/🇦🇩 Catalan:**
-- [Guia d'Inversió (Principiants)](docs/ca/guia_principiant.md): Aprèn conceptes bàsics de Swing Trading pas a pas sense por.
-- [Especificació Tècnica (Experts)](docs/ca/referencia_expert.md): Arquitectura de cubells, reconeixement de patrons i les matemàtiques darrere les decisions.
+**🏴󠁥󠁳󠁣󠁴󠁿 Catalan:**
+- [**Guia d'Inversió (Principiants)**](docs/ca/guia_principiant.md): Aprèn conceptes bàsics de Swing Trading pas a pas sense por.
 - [Instruccions RAG (Personalització)](docs/ca/instruccions_rag.md): Aprèn a personalitzar la IA amb la teva pròpia filosofia en PDF.
 
 **🇪🇸 Spanish:**
-- [Guía de Inversión (Principiantes)](docs/es/guia_principiante.md): Aprende conceptos básicos de Swing Trading paso a paso sin miedo.
-- [Referencia Técnica (Expertos)](docs/es/referencia_experto.md): Arquitectura de cubetas, reconocimiento de patrones y las matemáticas detrás de las decisiones.
+- [**Guía de Inversión (Principiantes)**](docs/es/guia_principiante.md): Aprende conceptos básicos de Swing Trading paso a paso sin miedo.
 - [Instrucciones RAG (Personalización)](docs/es/instrucciones_rag.md): Aprende a personalizar la IA con tu propia filosofía en PDF.
 
 ## Future Roadmap
@@ -71,4 +68,9 @@ Learn how RadarCore thinks and make better investment decisions:
 - **Portfolio Tracking:** Basic module to track the performance of detected opportunities.
 
 ---
+
+### Acknowledgments and Credits
+This software has been developed thanks to the inspiration from the work of Dani Sánchez-Crespo (https://www.skool.com/decodecore) and David Bastidas (https://www.davidbastidas.com/) in addition to their collaboration.
+This software has been programmed with a pedagogical intention and thanks to Gemini and Claude.
+
 *Disclaimer: This tool is for educational and research purposes only. It does not constitute financial advice.*

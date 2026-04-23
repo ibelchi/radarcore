@@ -33,8 +33,8 @@ class RiseScorer(BaseBucketScorer):
         if upside_ath3y > 15:
             total_score += 30
             
-        forca = "strong" if total_score >= 60 else "moderate"
-        reasoning = f"Rise {forca}, {upside_ath3y:.1f}% to ATH 3Y"
+        forca = "fort" if total_score >= 60 else "moderat"
+        reasoning = f"Rise {forca}, {upside_ath3y:.1f}% fins ATH 3Y"
         
         return {
             "score": min(100, total_score),

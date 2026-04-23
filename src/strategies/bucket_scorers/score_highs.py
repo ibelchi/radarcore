@@ -33,8 +33,8 @@ class HighsScorer(BaseBucketScorer):
         if vol_decreixent:
             total_score += 20
             
-        rsi_str = "overbought" if rsi > 70 else "neutral"
-        reasoning = f"At highs, RSI {rsi:.1f} - {rsi_str}"
+        rsi_str = "sobrecomprat" if rsi > 70 else "neutre"
+        reasoning = f"En màxims, RSI {rsi:.1f} - {rsi_str}"
         
         return {
             "score": min(100, total_score),
@@ -42,6 +42,6 @@ class HighsScorer(BaseBucketScorer):
             "key_metrics": {
                 "dist_maxim_pct": dist_maxim_pct,
                 "rsi": rsi,
-                "volum_trend": "decreasing" if vol_decreixent else "increasing"
+                "volum_trend": "decreixent" if vol_decreixent else "creixent"
             }
         }

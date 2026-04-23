@@ -17,7 +17,7 @@ Si quieres que la IA descarte automáticamente ciertas empresas, sube un archivo
 
 ### Ejemplo 3: Metodología de Libros
 Puedes subir libros de trading clásicos. La IA extraerá los consejos:
-> "Según el método de Santa Weinstein, solo compramos si el precio está por encima de la media móvil de 30 semanas."
+> "Según el método de Stan Weinstein, solo compramos si el precio está por encima de la media móvil de 30 semanas."
 
 ## 🚀 ¿Qué pasa en el Informe?
 Cuando la IA genera un informe para una oportunidad detectada:

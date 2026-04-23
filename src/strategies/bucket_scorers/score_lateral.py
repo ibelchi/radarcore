@@ -40,8 +40,8 @@ class LateralScorer(BaseBucketScorer):
         if vol_decreixent:
             total_score += 30
             
-        vol_str = "decreasing" if vol_decreixent else "stable"
-        reasoning = f"Lateral base {dies_en_lateral}d, range {rang_15d:.1f}%, volume {vol_str}"
+        vol_str = "decreixent" if vol_decreixent else "estable"
+        reasoning = f"Base lateral {dies_en_lateral}d, rang {rang_15d:.1f}%, volum {vol_str}"
         
         return {
             "score": min(100, total_score),
@@ -49,6 +49,6 @@ class LateralScorer(BaseBucketScorer):
             "key_metrics": {
                 "dies_lateral": dies_en_lateral,
                 "rang_pct": rang_15d,
-                "volum_trend": "decreasing" if vol_decreixent else "increasing"
+                "volum_trend": "decreixent" if vol_decreixent else "creixent"
             }
         }

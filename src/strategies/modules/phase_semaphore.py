@@ -19,7 +19,7 @@ class PhaseSemaphore:
         Returns a dict with 'phase_emoji' and 'phase_name'.
         """
         if hist_data is None or hist_data.empty or len(hist_data) < 20:
-            return {"phase_emoji": "⚪", "phase_name": "NO DATA"}
+            return {"phase_emoji": "⚪", "phase_name": "SENSE DADES"}
 
         recent_data = hist_data.tail(self.lookback_days).copy()
         current_price = float(hist_data["Close"].iloc[-1])
@@ -37,14 +37,14 @@ class PhaseSemaphore:
         range_pct = ((base_high - base_low) / base_low) * 100 if base_low > 0 else 99.0
         
         if drop_pct >= self.min_drop_pct and rebound_pct < self.rebound_val_pct and range_pct > self.base_range_pct:
-            return {"phase_emoji": "🔴", "phase_name": "FALLING"}
+            return {"phase_emoji": "🔴", "phase_name": "CAIGUDA"}
         elif range_pct <= self.base_range_pct and drop_pct >= (self.min_drop_pct / 2):
             return {"phase_emoji": "🟡", "phase_name": "BASE"}
         elif rebound_pct >= self.rebound_val_pct:
-            return {"phase_emoji": "🟢", "phase_name": "BREAKOUT"}
+            return {"phase_emoji": "🟢", "phase_name": "RUPTURA"}
         else:
             # If it's near ATH
             if drop_pct < self.min_drop_pct:
-                return {"phase_emoji": "🟢", "phase_name": "HIGHS"}
-            return {"phase_emoji": "⚪", "phase_name": "INDECISION"}
+                return {"phase_emoji": "🟢", "phase_name": "ALTS"}
+            return {"phase_emoji": "⚪", "phase_name": "INDECISIÓ"}
 

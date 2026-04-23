@@ -127,11 +127,11 @@ class MarketScanner:
                                 if scan_logger:
                                     scan_logger.log(sym, "UNIVERSE_FILTER", "SKIP", uf_result.get("reason", ""))
                                 if on_opportunity_found:
-                                    on_opportunity_found(sym, hist_data, {"is_opportunity": False, "reason": "Universe: " + uf_result.get("reason", "")})
+                                    on_opportunity_found(sym, hist_data, {"is_opportunity": False, "reason": "Univers: " + uf_result.get("reason", "")})
                                 continue
                             else:
                                 if scan_logger:
-                                    scan_logger.log(sym, "UNIVERSE_FILTER", "PASS", "Liquidity and history criteria correct")
+                                    scan_logger.log(sym, "UNIVERSE_FILTER", "PASS", "Criteris de liquiditat i historial correctes")
 
                         # 0. L-BASE Detection
                         lbase_res = lbase_det.analyze(hist_data)
@@ -142,14 +142,14 @@ class MarketScanner:
                             # Add some note to the DB item manually if we want
                             w_item = db.query(Watchlist).filter(Watchlist.symbol == sym).first()
                             if w_item:
-                                w_item.notes = "L-BASE Automatically detected"
+                                w_item.notes = "L-BASE Detectat automàticament"
                                 w_item.active = True
                             db.commit()
 
                             if scan_logger:
                                 scan_logger.log(sym, "L-BASE", "SKIP", "Mogut a Watchlist separada.")
                             if on_opportunity_found:
-                                on_opportunity_found(sym, hist_data, {"is_opportunity": False, "reason": "L-BASE sent to watchlist"})
+                                on_opportunity_found(sym, hist_data, {"is_opportunity": False, "reason": "L-BASE enviat a watchlist"})
                             continue
                             
                         # Mòdul Sistèmic i Semàfor (S'avaluen aquí però els resultats seran agregats només si l'estratègia fa pass)
@@ -181,7 +181,7 @@ class MarketScanner:
                                     "is_systemic_new": sys_res.get("is_systemic", False),
                                     "systemic_relative_drop": sys_res.get("relative_drop_pct", 0.0),
                                     "phase_emoji": sem_res.get("phase_emoji", "⚪"),
-                                    "phase_name_new": sem_res.get("phase_name", "INDECISION")
+                                    "phase_name_new": sem_res.get("phase_name", "INDECISIÓ")
                                 })
                                 result["metrics"] = metrics
                             except Exception as e:

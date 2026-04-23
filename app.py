@@ -11,12 +11,12 @@ def check_password() -> bool:
     if st.session_state.get("authenticated"):
         return True
     pwd = st.text_input("Password", type="password", key="login_pwd")
-    if st.button("Login", key="login_btn"):
+    if st.button("Entrar", key="login_btn"):
         if pwd == st.secrets.get("passwords", {}).get("admin", ""):
             st.session_state["authenticated"] = True
             st.rerun()
         else:
-            st.error("Incorrect password")
+            st.error("Password incorrecta")
     return False
 
 def is_cloud() -> bool:
@@ -59,7 +59,7 @@ if "scan_logger" not in st.session_state:
 scan_logger = st.session_state.scan_logger
 
 # --- CONSTANTS ---
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 LOGO_PATH = "assets/logo.png"
 
 # --- PAGE CONFIG ---
@@ -139,6 +139,33 @@ st.markdown("""
 with st.sidebar:
     st.title("Settings")
     st.divider()
+    st.subheader("Analysis Mode")
+    
+    auto_mode = st.toggle(
+        "Automatic mode",
+        value=True,
+        help="ON: all opportunities are passed to the scanner. OFF: manual watchlist only."
+    )
+    st.session_state["auto_mode"] = auto_mode
+    
+    use_universe_filter = st.toggle(
+        "Pre-filter universe",
+        key="use_universe_filter",
+        help="ON: applies liquidity and zombie filters before scanning (~250 stocks). OFF: scans all tickers directly, the bucketer handles the noise (~500 stocks)."
+    )
+    
+    db_sidebar = SessionLocal()
+    try:
+        if auto_mode:
+            st.caption("✅ All opportunities pass to the Pattern Scanner")
+        else:
+            n = db_sidebar.query(Watchlist).filter(Watchlist.active == True).count()
+            st.caption(f"📋 {n} tickers in manual watchlist")
+    finally:
+        db_sidebar.close()
+
+    st.divider()
+
     st.subheader("AI Configuration")
     ai_provider = st.radio("AI Provider", ["Google Gemini", "OpenAI"], index=0)
     
@@ -163,32 +190,6 @@ with st.sidebar:
         index=0,
         help="Select the language for the AI-generated research reports."
     )
-
-    st.divider()
-    st.subheader("🎯 Analysis Mode")
-    
-    auto_mode = st.toggle(
-        "Automatic mode",
-        value=True,
-        help="ON: all opportunities are passed to the scanner. OFF: manual watchlist only."
-    )
-    st.session_state["auto_mode"] = auto_mode
-    
-    use_universe_filter = st.toggle(
-        "Pre-filter universe",
-        key="use_universe_filter",
-        help="ON: applies liquidity and zombie filters before scanning (~250 stocks). OFF: scans all tickers directly, the bucketer handles the noise (~500 stocks)."
-    )
-    
-    db_sidebar = SessionLocal()
-    try:
-        if auto_mode:
-            st.caption("✅ All opportunities pass to the Pattern Scanner")
-        else:
-            n = db_sidebar.query(Watchlist).filter(Watchlist.active == True).count()
-            st.caption(f"📋 {n} tickers in manual watchlist")
-    finally:
-        db_sidebar.close()
 
     st.divider()
     if scan_logger.end_time:
@@ -579,7 +580,7 @@ with tab_history:
         if not opportunities:
             st.info("No market opportunities detected yet.")
         else:
-            # USER FILTERS
+            # FILTRES D'USUARI
             col_filter, col_score, col_sys = st.columns([2, 1, 1])
             with col_filter:
                 bucket_filter = st.radio(
@@ -599,7 +600,7 @@ with tab_history:
             with col_sys:
                 st.write("")
                 st.write("")
-                show_systemic = st.checkbox("🔍 Show Systemic", value=False)
+                show_systemic = st.checkbox("🔍 Mostra Sistèmiques", value=False)
 
             def matches_bucket_filter(pattern: str, filter_val: str) -> bool:
                 mapping = {
@@ -636,7 +637,7 @@ with tab_history:
                 if not show_systemic and m.get("is_systemic_new", False) is True:
                     continue
 
-                # Old classifier phases
+                # Fase antigues del classifier
                 phase = m.get("phase", "N/A")
                 phase_emojis = {
                     "VALLEY": "🟢", "MID": "🟡", "MATURE": "🟠", "LATE": "🔴", "NO_PATTERN": "⚪"
@@ -644,7 +645,7 @@ with tab_history:
                 emoji = phase_emojis.get(phase, "⚪")
                 phase_str = f"{emoji} {phase}" if phase != "N/A" else "N/A"
                 
-                # New semaphore
+                # Semàfor nou
                 nou_semafor = m.get("phase_emoji", "")
                 if nou_semafor:
                     fase_nom = m.get("phase_name_new", "")
@@ -659,7 +660,7 @@ with tab_history:
                 data.append({
                     "Symbol": f"https://es.finance.yahoo.com/quote/{op.symbol}/",
                     "Company": op.company_name or op.symbol,
-                    "Status": nou_estat,
+                    "Estat": nou_estat,
                     "Drop %": f"{drop_val:.1f}%",
                     "Rebound %": f"{rebound_val:.1f}%",
                     "Pattern": pattern_label,
@@ -693,7 +694,7 @@ with tab_history:
                     ascending=[True, False, False]
                 ).drop(columns=["_phase_order", "_conf_num", "_upside_num"]).reset_index(drop=True)
             
-            # Filter counter
+            # Comptador sota els filtres
             st.caption(f"{len(df_display)} results out of {len(opportunities)}")
 
             # -----------------------------------------------------------
@@ -715,7 +716,7 @@ with tab_history:
                 selection_mode="multi-row"
             )
             
-            # Read selection from session_state
+            # Llegim la selecció directament del session_state del widget
             raw_selection = st.session_state.get("history_table_df", {})
             if hasattr(raw_selection, "selection"):
                 selected_indices = raw_selection.selection.rows or []
@@ -934,7 +935,7 @@ with tab_history:
                     if not item["hist"].empty:
                         render_tv_chart(item['symbol'], item["hist"], item["metrics"], height=500)
                             
-                    # ACTION BUTTONS PER ITEM
+                    # BOTONS D'ACCIÓ PER ITEM
                     colA, colC = st.columns([1,1])
                     sym = item['symbol']
                     m = item.get("metrics", {})

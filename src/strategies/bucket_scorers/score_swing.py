@@ -39,8 +39,8 @@ class SwingScorer(BaseBucketScorer):
         if pendent > 0:
             total_score += 10
             
-        vol_str = "confirmed" if vol_confirmat else "weak"
-        reasoning = f"Swing: {upside_ath3y:.1f}% upside, {dies_des_minim} days from low, volume {vol_str}"
+        vol_str = "confirmat" if vol_confirmat else "feble"
+        reasoning = f"Swing: {upside_ath3y:.1f}% upside, {dies_des_minim} dies des del mínim, volum {vol_str}"
         
         return {
             "score": min(100, total_score),
