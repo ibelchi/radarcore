@@ -1,44 +1,44 @@
-# Desplegament de RadarCore al Núvol
+# Deploying RadarCore to the Cloud
 
-Aquesta guia detalla com posar el RadarCore en producció utilitzant Streamlit Community Cloud (o solucions similars tipus Railway, Heroku o Render) de forma segura i protegint el teu entorn.
+This guide explains how to deploy RadarCore to production using Streamlit Community Cloud (or similar platforms like Railway, Heroku, or Render) securely and with your environment protected.
 
-## 1. Prerequisits
+## 1. Prerequisites
 
-1. Compta de **GitHub** amb el repositori actualitzat.
-2. Un compte gratuït a [Streamlit Community Cloud](https://share.streamlit.io).
-3. (Opcional) Una API Key de **Google Gemini** per als informes interactius (RAG).
+1. A **GitHub** account with the repository up to date.
+2. A free account at [Streamlit Community Cloud](https://share.streamlit.io).
+3. (Optional) A **Google Gemini** API Key for interactive AI reports (RAG).
 
-## 2. Passos de Desplegament (Streamlit Cloud)
+## 2. Deployment Steps (Streamlit Cloud)
 
-1. Accedeix a `share.streamlit.io` i registra't connectant el teu perfil de GitHub.
-2. Fes clic a **"New app"**.
-3. Selecciona el teu repositori (`radarcore` o similar), la branca `main`, i marca `app.py` com a "Main file path".
-4. **NO cliquis a 'Deploy' encara**. Clica al botó inferior que diu **"Advanced settings"** (o en la icona d'engranatge de "Secrets").
+1. Go to `share.streamlit.io` and sign up by connecting your GitHub profile.
+2. Click **"New app"**.
+3. Select your repository (`radarcore`), the `main` branch, and set `app.py` as the "Main file path".
+4. **Do NOT click 'Deploy' yet**. Click the button at the bottom labelled **"Advanced settings"** (or the gear icon under "Secrets").
 
-## 3. Gestió de Secrets i Contrasenyes
+## 3. Managing Secrets and Passwords
 
-Per tal que l'aplicatiu pugui executar-se de manera protegida *només* per a tu, has d'establir la configuració al núvol, ja que has observat que l'arxiu `.streamlit/secrets.toml` s'ha inclòs al `.gitignore` i no es va pujar.
+For the app to run in a protected mode *only for you*, you must configure the secrets in the cloud — the `.streamlit/secrets.toml` file is intentionally excluded from the repository via `.gitignore` and was not pushed.
 
-Dins de l'apartat de **Secrets** a la web de Streamlit on-Deploy (o des de *Settings -> Secrets* si l'has llançat per error), copia aquest text fix:
+Inside the **Secrets** section on the Streamlit deployment page (or via *Settings → Secrets* if you already deployed), paste the following:
 
 ```toml
 [passwords]
-# Modifica aquesta contrasenya per la teva pròpia!
-admin = "CANVIA_AQUESTA_PASSWORD"
+# Change this password to your own!
+admin = "CHANGE_THIS_PASSWORD"
 
-# Això forçarà que l'aplicatiu bloquegi la interfície si no passes la password.
+# This forces the app to lock the interface until the correct password is entered.
 IS_CLOUD_DEPLOYMENT = "true"
 ```
 
-*Opcionalment, si tens claus de Google, afegeix també `GOOGLE_API_KEY = "la_teva_clau"` allà mateix.*
+*Optionally, if you have a Google API key, add `GOOGLE_API_KEY = "your_key"` in the same block.*
 
-**Opcions Cloud vs Local:**
-L'aplicació conté un algoritme `is_cloud()` incrustat a l'inici d'`app.py` que detectarà automàticament on ets. A l'ordinador local no es demanarà mai cap contrasenya. A Streamlit Sharing, o quan `IS_CLOUD_DEPLOYMENT = "true"`, et bloquejarà fins no validar el secret d'autorització.
+**Cloud vs Local behaviour:**
+The app contains an `is_cloud()` function embedded at the start of `app.py` that automatically detects the environment. On your local machine, no password will ever be required. On Streamlit Sharing, or when `IS_CLOUD_DEPLOYMENT = "true"`, the interface will be locked until the authorization secret is validated.
 
-## 4. Opcions UI Post-Desplegament
+## 4. Post-Deployment UI Options
 
-Recordeu que **RadarCore** ve carregat amb un Selector (`Toggle`) lateral sota anomenat "Mode d'Anàlisi". 
-Quan et trobis al núvol i executis fons llargs:
+**RadarCore** has a sidebar toggle called **"Analysis Mode"**.
+When running in the cloud with long scan jobs:
 
-* **Mode Automàtic**: Escanejarà l'S&P 500 complet, el que pot sobrecarregar-se si Yahoo repeteix filtres per excés de peticions de xarxa (429 Rate Limit error).
-* **Mode Watchlist**: Es cenyirà exclusivament a la teva curació manual privada a la taula de SQLite. Aquesta és la configuració més segura i ràpida un cop al servidor cloud. Si escanegeu llibre obert recomanem processament batch des de local.
+* **Automatic Mode**: Scans the full S&P 500, which can get throttled if Yahoo Finance blocks repeated requests (HTTP 429 Rate Limit error).
+* **Watchlist Mode**: Scans exclusively against your private manual watchlist stored in SQLite. This is the safest and fastest configuration once on the cloud server. For full open-universe scanning, batch processing from a local machine is recommended.
