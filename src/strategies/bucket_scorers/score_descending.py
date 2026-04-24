@@ -30,13 +30,13 @@ class DescendingScorer(BaseBucketScorer):
             
         vol_5d = hist_data['Volume'].tail(5).mean()
         vol_20d = hist_data['Volume'].tail(20).mean()
-        vol_confirma = vol_5d > vol_20d # pujada de volum confirmant baixada
+        vol_confirma = vol_5d > vol_20d # volume increase confirming drop
         
         if vol_confirma:
             total_score += 20
             
-        forca = "forta" if total_score >= 60 else "moderada"
-        reasoning = f"Baixada {forca} - evitar entrada"
+        strength = "strong" if total_score >= 60 else "moderate"
+        reasoning = f"Drop {strength} - avoid entry"
         
         return {
             "score": min(100, total_score),

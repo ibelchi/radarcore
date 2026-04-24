@@ -39,7 +39,7 @@ class EraBucketer(BaseBucketer):
         points = [(i, closes[i]) for i in range(len(closes))]
         key_points = rdp(points, epsilon)
         
-        # Segona passada RDP per la tendència macro
+        # Second RDP pass for macro trend
         self.macro_points = rdp(key_points, epsilon * 3)
         
         eras = []
@@ -131,17 +131,17 @@ class EraBucketer(BaseBucketer):
         high_15d = hist_data['High'].tail(15).max()
         low_15d = hist_data['Low'].tail(15).min()
         if low_15d > 0:
-            rang_15d = (high_15d - low_15d) / low_15d * 100
-            if rang_15d < 8:
+            range_15d = (high_15d - low_15d) / low_15d * 100
+            if range_15d < 8:
                 scores["LATERAL"] += 50
                 
         try:
             lows_15 = hist_data['Low'].tail(15)
-            dies_des_minim = len(lows_15) - lows_15.values.argmin() - 1
+            days_since_low = len(lows_15) - lows_15.values.argmin() - 1
         except:
-            dies_des_minim = 0
+            days_since_low = 0
 
-        if dies_des_minim >= 10:
+        if days_since_low >= 10:
             scores["LATERAL"] += 30
         if drop_pct >= 0.10:
             scores["LATERAL"] += 20

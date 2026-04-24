@@ -1,0 +1,983 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Informe del cierre · 23 abr 2026</title>
+<style>
+  :root {
+    --bg: #0b0d10;
+    --bg-alt: #11141a;
+    --bg-card: #161b22;
+    --bg-card-hi: #1c2230;
+    --line: #232a35;
+    --line-soft: #1a1f29;
+    --text: #e8edf2;
+    --text-dim: #98a2b3;
+    --text-faint: #6b7686;
+    --gold: #c9a35c;
+    --gold-bright: #e8c98e;
+    --green: #4ade80;
+    --green-soft: #1f3a2a;
+    --red: #f87171;
+    --red-soft: #3a1f24;
+    --amber: #fbbf24;
+    --amber-soft: #3a2e15;
+    --blue: #60a5fa;
+    --blue-soft: #1e2a3d;
+    --purple: #a78bfa;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; line-height: 1.55; }
+  a { color: var(--gold-bright); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 24px 96px; }
+
+  /* HEADER */
+  header.top {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 22px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  header.top h1 {
+    font-size: 26px;
+    margin: 0 0 4px 0;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  header.top h1 .accent { color: var(--gold); }
+  header.top .meta { color: var(--text-dim); font-size: 13px; }
+  .pulse {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--amber);
+    box-shadow: 0 0 0 0 rgba(251,191,36,.5);
+    animation: pulse 2.4s infinite;
+    margin-right: 6px; vertical-align: middle;
+  }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(251,191,36,.5);} 70%{ box-shadow: 0 0 0 10px rgba(251,191,36,0);} 100%{ box-shadow: 0 0 0 0 rgba(251,191,36,0);} }
+
+  /* TL;DR card */
+  .tldr {
+    background: linear-gradient(180deg, #1a1410 0%, #131418 100%);
+    border: 1px solid var(--gold);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 32px;
+  }
+  .tldr h2 { margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; letter-spacing: .12em; color: var(--gold); font-weight: 600; }
+  .tldr p { margin: 6px 0; color: var(--text); }
+  .tldr ul { margin: 8px 0 0 0; padding-left: 18px; }
+  .tldr li { margin: 4px 0; color: var(--text); }
+
+  /* Sections */
+  section { margin-bottom: 42px; }
+  section > h2.heading {
+    font-size: 18px;
+    margin: 0 0 18px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: baseline; justify-content: space-between;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  section > h2.heading .sub { font-size: 12px; color: var(--text-faint); font-weight: 400; }
+
+  /* Macro grid */
+  .macro-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .macro-tile {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .macro-tile .lbl { color: var(--text-faint); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+  .macro-tile .val { font-size: 18px; font-weight: 600; margin-top: 4px; }
+  .macro-tile .pct { font-size: 12px; margin-top: 2px; font-weight: 500; }
+  .pos { color: var(--green); }
+  .neg { color: var(--red); }
+  .neu { color: var(--text-dim); }
+
+  /* Sector heatmap */
+  .sectors {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px;
+  }
+  .sector {
+    border-radius: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px;
+  }
+  .sector .name { color: var(--text-dim); }
+  .sector .v { font-weight: 600; }
+  .sec-up   { background: linear-gradient(90deg, rgba(74,222,128,0.10), transparent); border-color: rgba(74,222,128,0.20); }
+  .sec-down { background: linear-gradient(90deg, rgba(248,113,113,0.10), transparent); border-color: rgba(248,113,113,0.20); }
+
+  /* Lectura macro */
+  .reading {
+    background: var(--bg-card);
+    border-left: 3px solid var(--gold);
+    padding: 16px 18px;
+    border-radius: 6px;
+    margin-top: 14px;
+    color: var(--text);
+  }
+  .reading b { color: var(--gold-bright); }
+
+  /* Opportunities */
+  .opp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 760px) { .opp-grid { grid-template-columns: 1fr; } }
+  .opp {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .opp.priority { border-color: var(--gold); }
+  .opp .badge {
+    position: absolute; top: 14px; right: 14px;
+    font-size: 10px; padding: 3px 8px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: .08em; font-weight: 600;
+  }
+  .badge.alta { background: rgba(74,222,128,0.15); color: var(--green); }
+  .badge.media { background: rgba(96,165,250,0.15); color: var(--blue); }
+  .badge.specu { background: rgba(167,139,250,0.18); color: var(--purple); }
+  .badge.evitar { background: var(--red-soft); color: var(--red); }
+  .opp .ticker {
+    display: flex; align-items: baseline; gap: 8px;
+    margin-bottom: 4px;
+  }
+  .opp .ticker .sym { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+  .opp .ticker .name { color: var(--text-faint); font-size: 12px; }
+  .opp .price-row {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 14px;
+  }
+  .opp .price { font-size: 20px; font-weight: 600; }
+  .opp .chg { font-size: 14px; font-weight: 600; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .tag {
+    font-size: 11px; padding: 3px 8px; border-radius: 4px;
+    background: var(--bg-card-hi);
+    color: var(--text-dim);
+    border: 1px solid var(--line);
+  }
+  .tag.swing { color: var(--blue); border-color: rgba(96,165,250,0.3); }
+  .tag.riser { color: var(--green); border-color: rgba(74,222,128,0.3); }
+  .tag.down { color: var(--red); border-color: rgba(248,113,113,0.3); }
+  .tag.lateral { color: var(--text-dim); border-color: var(--line); }
+  .tag.top { color: var(--gold); border-color: rgba(201,163,92,0.4); }
+
+  .levels {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    background: var(--bg-card-hi);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    font-size: 12px;
+  }
+  .levels .lvl { display: flex; flex-direction: column; }
+  .levels .lvl-lbl { color: var(--text-faint); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+  .levels .lvl-val { color: var(--text); font-weight: 600; font-size: 13px; }
+  .lvl-val.entry { color: var(--gold-bright); }
+  .lvl-val.stop { color: var(--red); }
+  .lvl-val.t1, .lvl-val.t2 { color: var(--green); }
+
+  .indicators {
+    display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px;
+    margin-bottom: 12px; color: var(--text-dim);
+  }
+  .indicators .ind b { color: var(--text); font-weight: 500; }
+  .ind .extreme { color: var(--amber); font-weight: 700; }
+  .ind .oversold { color: var(--green); font-weight: 700; }
+  .ind .overbought { color: var(--red); font-weight: 700; }
+
+  .reasoning {
+    color: var(--text);
+    font-size: 13px;
+    border-top: 1px dashed var(--line);
+    padding-top: 12px;
+  }
+  .reasoning .label { color: var(--gold); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; display: block; margin-bottom: 4px; }
+
+  /* Tablas */
+  .tbl-wrap { overflow-x: auto; }
+  table.t {
+    width: 100%; border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.t th, table.t td {
+    text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line-soft);
+  }
+  table.t th { color: var(--text-faint); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  table.t td { color: var(--text); }
+  table.t td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.t tr:hover td { background: var(--bg-alt); }
+
+  /* Trazo cards by category */
+  .trazo-cats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .trazo-cat {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .trazo-cat h3 { margin: 0 0 10px 0; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+  .trazo-cat ul { list-style: none; padding: 0; margin: 0; }
+  .trazo-cat li {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 5px 0; font-size: 13px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .trazo-cat li:last-child { border-bottom: none; }
+  .trazo-cat li .sym { font-weight: 600; color: var(--text); }
+  .trazo-cat li .conf { color: var(--text-faint); font-size: 11px; font-variant-numeric: tabular-nums; }
+
+  /* Footer */
+  footer {
+    margin-top: 60px; padding-top: 22px;
+    border-top: 1px solid var(--line);
+    color: var(--text-faint);
+    font-size: 12px;
+    text-align: center;
+  }
+
+  /* Action plan */
+  .plan {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .plan-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .plan-card h3 { margin: 0 0 8px 0; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--gold); }
+  .plan-card ul { margin: 0; padding-left: 18px; }
+  .plan-card li { margin: 4px 0; font-size: 13px; }
+
+  /* Anchor nav */
+  nav.toc {
+    position: sticky; top: 0;
+    background: rgba(11,13,16,0.92);
+    backdrop-filter: blur(12px);
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line-soft);
+    margin: -28px -24px 24px -24px;
+    padding: 12px 24px;
+    z-index: 50;
+    overflow-x: auto;
+  }
+  nav.toc a {
+    color: var(--text-dim);
+    margin-right: 18px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    white-space: nowrap;
+  }
+  nav.toc a:hover { color: var(--gold); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="toc">
+  <a href="#tldr">TL;DR</a>
+  <a href="#macro">Macro</a>
+  <a href="#oportunidades">Oportunidades</a>
+  <a href="#cartera">Mi cartera</a>
+  <a href="#movers">Movers Yahoo</a>
+  <a href="#evitar">Evitar</a>
+  <a href="#plan">Plan mañana</a>
+</nav>
+
+<header class="top">
+  <div>
+    <h1>Informe del cierre <span class="accent">— 23 abril 2026</span></h1>
+    <div class="meta">Análisis post-mercado · Trazo + Patrones + Yahoo movers · Generado a las <span id="genTime"></span></div>
+  </div>
+  <div class="meta">
+    <span class="pulse"></span> Día de rotación · NDX -0.93%
+  </div>
+</header>
+
+<!-- TL;DR -->
+<section id="tldr">
+  <div class="tldr">
+    <h2>TL;DR</h2>
+    <p><b style="color:var(--gold-bright)">No es un crash, es un trasvase.</b> Tech (-1.55%) y Energía (-1.02%) sangran, pero los defensivos y cíclicos de calidad <b>vuelan</b>: Staples +2.43%, Industrials +1.76%, RealEstate +1.76%, Salud +0.86%. El VIX sube solo a 19.14 (régimen <i>medium</i>), no hay pánico real.</p>
+    <ul>
+      <li><b>Mejor oportunidad reactiva</b> (ya cayó, oversold con estructura): <b>TMO</b> -9.7% y <b>MEDP</b> -22% — ambos retest-deep en V/L con R/R 3.8x y 6.2x. RSI capitulación.</li>
+      <li><b>Mejor oportunidad estructural</b> (calidad sin chase): <b>DOW</b> SWING breakout BALANCED (74% conf), <b>MSFT</b> retest-deep R/R 3.25, <b>META</b> V-Bottom breakout sano.</li>
+      <li><b>Trampa de momentum</b>: <b>TXN +18%, ON +9%, MCHP +9%, STM +11%, WST +14%, URI +22%</b> — todos con RSI14 entre 81 y 88. <b>NO entrar en chase</b>: esperar pullback a EMA21.</li>
+      <li><b>Tu lista</b>: AAOI -9% y AXTI -15% (Fotónica) — RISER confirmado pero pullback profundo, vigilar mañana si confirma vela. MCHP de Swing list ya disparó, llegas tarde.</li>
+      <li><b>Posición abierta COF</b>: aguanta -1.7%, RSI 51, sin alarmas. Mantener stop estructural en $175.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- MACRO -->
+<section id="macro">
+  <h2 class="heading">Contexto macro <span class="sub">cierre 23-abr-2026 · 18:54 UTC</span></h2>
+
+  <div class="macro-grid">
+    <div class="macro-tile"><div class="lbl">S&amp;P 500</div><div class="val">7106.21</div><div class="pct neg">-0.44%</div></div>
+    <div class="macro-tile"><div class="lbl">Nasdaq</div><div class="val">24429.13</div><div class="pct neg">-0.93%</div></div>
+    <div class="macro-tile"><div class="lbl">Dow Jones</div><div class="val">49301.86</div><div class="pct neg">-0.38%</div></div>
+    <div class="macro-tile"><div class="lbl">VIX</div><div class="val">19.14</div><div class="pct neg">+1.16%</div></div>
+    <div class="macro-tile"><div class="lbl">DXY</div><div class="val">98.74</div><div class="pct neg">+0.16%</div></div>
+    <div class="macro-tile"><div class="lbl">Bono 10Y</div><div class="val">4.32%</div><div class="pct neg">+0.51%</div></div>
+  </div>
+
+  <h3 style="font-size:13px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.08em;margin:20px 0 8px;">Sectores hoy (ETFs SPDR)</h3>
+  <div class="sectors">
+    <div class="sector sec-up"><span class="name">XLP · Staples</span><span class="v pos">+2.43%</span></div>
+    <div class="sector sec-up"><span class="name">XLI · Industrials</span><span class="v pos">+1.76%</span></div>
+    <div class="sector sec-up"><span class="name">XLRE · Real Estate</span><span class="v pos">+1.76%</span></div>
+    <div class="sector sec-up"><span class="name">XLU · Utilities</span><span class="v pos">+0.86%</span></div>
+    <div class="sector sec-up"><span class="name">XLV · Health</span><span class="v pos">+0.86%</span></div>
+    <div class="sector sec-down"><span class="name">XLY · Consumer Disc.</span><span class="v neg">-0.23%</span></div>
+    <div class="sector sec-down"><span class="name">XLC · Communications</span><span class="v neg">-0.24%</span></div>
+    <div class="sector sec-down"><span class="name">XLB · Materials</span><span class="v neg">-0.36%</span></div>
+    <div class="sector sec-down"><span class="name">XLF · Financials</span><span class="v neg">-0.88%</span></div>
+    <div class="sector sec-down"><span class="name">XLE · Energy</span><span class="v neg">-1.02%</span></div>
+    <div class="sector sec-down"><span class="name">XLK · Tech</span><span class="v neg">-1.55%</span></div>
+  </div>
+
+  <div class="reading">
+    <b>Lectura</b>: El día se llama <b>rotación defensiva</b>. El SPX cae poco (-0.44%) porque los pesos pesados de Staples/Industrials/RealEstate compensan. El golpe real está en <b>tech</b> (XLK -1.55%, NDX -0.93%) y en algunos blue-chips puntuales: <b>NOW -16.8%, TMO -9.7%, FCX -12%, MSFT -3.8%, TSLA -3.6%</b>. El VIX sigue contenido (19.14, régimen <i>medium</i>) y el DXY apenas sube — no hay risk-off macro: es <b>asignación</b>.<br><br>
+    <b>Implicación</b>: las caídas de tech son <i>reactivas</i> a noticias específicas (resultados de NOW, TMO, MEDP), no contagio sistémico. Esto crea oportunidades <b>quirúrgicas</b> en valores oversold de calidad, pero exige paciencia: hoy aún cae el cuchillo, mañana se busca confirmación de reversal en velas.<br><br>
+    <b>Régimen operativo</b>: medium-vol, R/R deben ser ≥2 y entradas deben ser en retest, no chase.
+  </div>
+</section>
+
+<!-- OPORTUNIDADES -->
+<section id="oportunidades">
+  <h2 class="heading">Oportunidades detectadas <span class="sub">Trazo + Pattern Scanner + indicadores</span></h2>
+
+  <div class="opp-grid">
+
+    <!-- TMO -->
+    <div class="opp priority">
+      <div class="badge alta">Alta convicción</div>
+      <div class="ticker"><span class="sym">TMO</span><span class="name">Thermo Fisher Scientific</span></div>
+      <div class="price-row"><span class="price">$464.02</span><span class="chg neg">-9.72% hoy</span></div>
+      <div class="tags">
+        <span class="tag down">Trazo: DOWN 49%</span>
+        <span class="tag">Borderline LATERAL</span>
+        <span class="tag">V-Bottom retest-deep</span>
+        <span class="tag">BALANCED+DISCOVERY</span>
+      </div>
+      <div class="levels">
+        <div class="lvl"><div class="lvl-lbl">Entrada</div><div class="lvl-val entry">$462.31</div></div>
+        <div class="lvl"><div class="lvl-lbl">Stop</div><div class="lvl-val stop">$416.07</div></div>
+        <div class="lvl"><div class="lvl-lbl">T1</div><div class="lvl-val t1">$514.86</div></div>
+        <div class="lvl"><div class="lvl-lbl">T2</div><div class="lvl-val t2">$639.45</div></div>
+      </div>
+      <div class="indicators">
+        <span class="ind">RSI14 <b class="oversold">35.2</b> · RSI7 <b class="oversold">24.2</b></span>
+        <span class="ind">MACD H <b>-0.99</b></span>
+        <span class="ind">EMA50 <b>$511.83</b></span>
+        <span class="ind">R/R <b>3.83x</b></span>
+      </div>
+      <div class="reasoning">
+        <span class="label">Por qué importa</span>
+        Blue-chip de healthcare castigado por resultados decepcionantes. RSI7 en 24 es <b>capitulación</b>, no debilidad estructural. El patrón V-Bottom retest-deep en <b>fase mitad-subida</b> con R/R 3.83x es de los setups con mayor win-rate histórico (~39%, +9.4% medio en 6 días). Sector salud cerró <b>+0.86%</b> hoy, viento de cola sectorial. <b>Espera vela de reversal mañana</b> antes de entrar.
+      </div>
+    </div>
+
+    <!-- MEDP -->
+    <div class="opp priority">
+      <div class="badge specu">Especulativa · alta R/R</div>
+      <div class="ticker"><span class="sym">MEDP</span><span class="name">Medpace Holdings</span></div>
+      <div class="price-row"><span class="price">$396.57</span><span class="chg neg">-22.01% hoy</span></div>
+      <div class="tags">
+        <span class="tag riser">Trazo: RISER 61%</span>
+        <span class="tag">L-Inclinada retest-deep</span>
+        <span class="tag">BALANCED+DISCOVERY</span>
+        <span class="tag">R/R 6.22x</span>
+      </div>
+      <div class="levels">
+        <div class="lvl"><div class="lvl-lbl">Entrada</div><div class="lvl-val entry">$397.96</div></div>
+        <div class="lvl"><div class="lvl-lbl">Stop</div><div class="lvl-val stop">$362.14</div></div>
+        <div class="lvl"><div class="lvl-lbl">T1</div><div class="lvl-val t1">$454.68</div></div>
+        <div class="lvl"><div class="lvl-lbl">T2</div><div class="lvl-val t2">$620.59</div></div>
+      </div>
+      <div class="indicators">
+        <span class="ind">RSI14 <b class="oversold">27.7</b> · RSI7 <b class="extreme">15.9</b></span>
+        <span class="ind">MACD H <b>-6.75</b></span>
+        <span class="ind">EMA200 <b>$488.23</b></span>
+        <span class="ind">R/R <b>6.22x</b></span>
+      </div>
+      <div class="reasoning">
+        <span class="label">Por qué importa</span>
+        RISER macro intacto (+105% neto) con corrección catastrófica de un día. RSI7 en 15.9 es lectura extrema; estadísticamente este nivel rebota técnicamente. R/R de 6.22x es <b>el más alto de todo el escaneo</b>. <b>Riesgo</b>: -22% en una sesión es ruido fundamental, puede haber gap-down adicional mañana en apertura. <b>Tamaño pequeño</b> y <b>esperar martillo / confirmación</b>. Sector salud favorable (+0.86%).
+      </div>
+    </div>
+
+    <!-- DOW -->
+    <div class="opp priority">
+      <div class="badge alta">Alta convicción · estructural</div>
+      <div class="ticker"><span class="sym">DOW</span><span class="name">Dow Inc.</span></div>
+      <div class="price-row"><span class="price">$37.99</span><span class="chg neg">-2.11% hoy</span></div>
+      <div class="tags">
+        <span class="tag swing">Trazo: SWING breakout 74%</span>
+        <span class="tag">L-Inclinada breakout</span>
+        <span class="tag">BALANCED+DISCOVERY</span>
+        <span class="tag">Recuperación 177%</span>
+      </div>
+      <div class="levels">
+        <div class="lvl"><div class="lvl-lbl">Entrada</div><div class="lvl-val entry">$38.02</div></div>
+        <div class="lvl"><div class="lvl-lbl">Stop</div><div class="lvl-val stop">$34.60</div></div>
+        <div class="lvl"><div class="lvl-lbl">T1</div><div class="lvl-val t1">$41.82</div></div>
+        <div class="lvl"><div class="lvl-lbl">T2</div><div class="lvl-val t2">$45.62</div></div>
+      </div>
+      <div class="indicators">
+        <span class="ind">RSI14 <b>49.7</b> (neutro)</span>
+        <span class="ind">MACD H <b>-0.47</b></span>
+        <span class="ind">EMA9 <b>$38.33</b> ≈ EMA21 <b>$38.34</b></span>
+        <span class="ind">EMA50 <b>$36.09</b> · EMA200 <b>$31.30</b></span>
+      </div>
+      <div class="reasoning">
+        <span class="label">Por qué importa</span>
+        Apareció en tu lista DECODE 17/04. Ya rompió estructura SWING (recuperación 177% del rango de caída) y hoy hace pullback técnico al cluster EMA9/EMA21. Alineación EMA9 &gt; EMA50 &gt; EMA200 es <b>libro de texto</b> para tendencia alcista. Sector materiales hoy débil (-0.36%) pero la estructura individual aguanta. Entrada limpia con R/R 2.22x. <b>Setup más limpio del informe.</b>
+      </div>
+    </div>
+
+    <!-- MSFT -->
+    <div class="opp priority">
+      <div class="badge alta">Alta convicción · paciencia</div>
+      <div class="ticker"><span class="sym">MSFT</span><span class="name">Microsoft</span></div>
+      <div class="price-row"><span class="price">$416.45</span><span class="chg neg">-3.80% hoy</span></div>
+      <div class="tags">
+        <span class="tag swing">Trazo: SWING 78%</span>
+        <span class="tag">V-Bottom retest-deep</span>
+        <span class="tag">BALANCED+DISCOVERY</span>
+        <span class="tag">R/R 3.25x</span>
+      </div>
+      <div class="levels">
+        <div class="lvl"><div class="lvl-lbl">Entrada</div><div class="lvl-val entry">$415.36</div></div>
+        <div class="lvl"><div class="lvl-lbl">Stop</div><div class="lvl-val stop">$376.41</div></div>
+        <div class="lvl"><div class="lvl-lbl">T1</div><div class="lvl-val t1">$448.32</div></div>
+        <div class="lvl"><div class="lvl-lbl">T2</div><div class="lvl-val t2">$542.07</div></div>
+      </div>
+      <div class="indicators">
+        <span class="ind">RSI14 <b>60.2</b> (neutro-fuerte)</span>
+        <span class="ind">MACD H <b>+5.92</b> (alcista)</span>
+        <span class="ind">EMA9 <b>$412.76</b></span>
+        <span class="ind">EMA200 <b>$442.81</b> (resistencia)</span>
+      </div>
+      <div class="reasoning">
+        <span class="label">Por qué importa</span>
+        En tu lista "Posibles Entradas 21/04". El precio ha llegado <b>justo</b> al nivel de entrada del patrón ($415.36) tras la corrección de hoy. R/R de 3.25x es excelente para una megacap. RSI14=60 es zona sana, no sobrecomprada. <b>Cuidado</b>: EMA200 en $442.81 actuará como resistencia inmediata; el primer objetivo realista es ese nivel, no T1.
+      </div>
+    </div>
+
+    <!-- META -->
+    <div class="opp">
+      <div class="badge alta">Alta convicción</div>
+      <div class="ticker"><span class="sym">META</span><span class="name">Meta Platforms</span></div>
+      <div class="price-row"><span class="price">$659.91</span><span class="chg neg">-2.19% hoy</span></div>
+      <div class="tags">
+        <span class="tag swing">Trazo: SWING 75%</span>
+        <span class="tag">V-Bottom breakout</span>
+        <span class="tag">DISCOVERY</span>
+      </div>
+      <div class="levels">
+        <div class="lvl"><div class="lvl-lbl">Entrada</div><div class="lvl-val entry">$657.96</div></div>
+        <div class="lvl"><div class="lvl-lbl">Stop</div><div class="lvl-val stop">$592.16</div></div>
+        <div class="lvl"><div class="lvl-lbl">T1</div><div class="lvl-val t1">$723.76</div></div>
+        <div class="lvl"><div class="lvl-lbl">T2</div><div class="lvl-val t2">$789.55</div></div>
+      </div>
+      <div class="indicators">
+        <span class="ind">RSI14 <b>57.8</b> (saludable)</span>
+        <span class="ind">MACD H <b>+7.05</b></span>
+        <span class="ind">EMA9 <b>$659.68</b> ≈ precio</span>
+        <span class="ind">Recuperación 50% del rango</span>
+      </div>
+      <div class="reasoning">
+        <span class="label">Por qué importa</span>
+        SWING en zona de breakout, recuperando ya el 50% del rango de caída. RSI=58 limpia, MACD claramente alcista. Entrada en $657 con stop estructural amplio. <b>Sector Communications -0.24% hoy</b>, headwind suave pero no destructivo. Buen complemento defensivo a MSFT (correlación menor).
+      </div>
+    </div>
+
+    <!-- PANW -->
+    <div class="opp">
+      <div class="badge alta">Alta convicción</div>
+      <div class="ticker"><span class="sym">PANW</span><span class="name">Palo Alto Networks</span></div>
+      <div class="price-row"><span class="price">$173.80</span><span class="chg neg">-4.08% hoy</span></div>
+      <div class="tags">
+        <span class="tag swing">Trazo: SWING 78%</span>
+        <span class="tag">V-Bottom breakout</span>
+        <span class="tag">BALANCED+DISCOVERY</span>
+      </div>
+      <div class="levels">
+        <div class="lvl"><div class="lvl-lbl">Entrada</div><div class="lvl-val entry">$173.35</div></div>
+        <div class="lvl"><div class="lvl-lbl">Stop</div><div class="lvl-val stop">$156.02</div></div>
+        <div class="lvl"><div class="lvl-lbl">T1</div><div class="lvl-val t1">$190.69</div></div>
+        <div class="lvl"><div class="lvl-lbl">T2</div><div class="lvl-val t2">$208.03</div></div>
+      </div>
+      <div class="indicators">
+        <span class="ind">RSI14 <b>56.9</b></span>
+        <span class="ind">MACD H <b>+1.56</b></span>
+        <span class="ind">EMA9 <b>$170.91</b> · EMA21 <b>$166.99</b></span>
+      </div>
+      <div class="reasoning">
+        <span class="label">Por qué importa</span>
+        En tu watchlist Trazo Test. Hoy hace pullback al cluster de EMAs en zona de entrada de patrón. R/R 2x, RSI sano. Sector tech debilidad sectorial pero <b>cyber</b> es defensivo dentro de tech. Setup limpio, no necesita prisa.
+      </div>
+    </div>
+
+    <!-- AAOI -->
+    <div class="opp">
+      <div class="badge media">Media convicción · ya en lista</div>
+      <div class="ticker"><span class="sym">AAOI</span><span class="name">Applied Optoelectronics</span></div>
+      <div class="price-row"><span class="price">$135.77</span><span class="chg neg">-9.14% hoy</span></div>
+      <div class="tags">
+        <span class="tag riser">Trazo: RISER 65%</span>
+        <span class="tag">L-Inclinada breakout</span>
+        <span class="tag">DISCOVERY only</span>
+        <span class="tag">EMA200 $58.97 (cap +130%)</span>
+      </div>
+      <div class="levels">
+        <div class="lvl"><div class="lvl-lbl">Entrada</div><div class="lvl-val entry">$135.80</div></div>
+        <div class="lvl"><div class="lvl-lbl">Stop</div><div class="lvl-val stop">$123.58</div></div>
+        <div class="lvl"><div class="lvl-lbl">T1</div><div class="lvl-val t1">$149.38</div></div>
+        <div class="lvl"><div class="lvl-lbl">T2</div><div class="lvl-val t2">$162.96</div></div>
+      </div>
+      <div class="indicators">
+        <span class="ind">RSI14 <b>54.8</b></span>
+        <span class="ind">RSI7 <b>44.2</b></span>
+        <span class="ind">MACD H <b>-0.51</b></span>
+      </div>
+      <div class="reasoning">
+        <span class="label">Por qué importa</span>
+        En tu lista <b>Fotónica</b>. RISER macro espectacular (+1685% net) pero el patrón solo pasa filtro DISCOVERY (no balanced) por estar en fase <i>maduro</i> y ya muy lejos de la EMA200. <b>Riesgo</b>: subida vertical previa, si rompe $123 puede ir a EMA50 ($106). Solo si confirmas reversal mañana, y con tamaño reducido (especulativa).
+      </div>
+    </div>
+
+    <!-- AXTI -->
+    <div class="opp">
+      <div class="badge media">Media convicción · ya en lista</div>
+      <div class="ticker"><span class="sym">AXTI</span><span class="name">AXT Inc.</span></div>
+      <div class="price-row"><span class="price">$73.49</span><span class="chg neg">-15.47% hoy</span></div>
+      <div class="tags">
+        <span class="tag riser">Trazo: RISER 60%</span>
+        <span class="tag">L-Inclinada breakout</span>
+        <span class="tag">DISCOVERY only</span>
+        <span class="tag">EMA200 $26.42 (recalentado)</span>
+      </div>
+      <div class="levels">
+        <div class="lvl"><div class="lvl-lbl">Entrada</div><div class="lvl-val entry">$73.49</div></div>
+        <div class="lvl"><div class="lvl-lbl">Stop</div><div class="lvl-val stop">$66.88</div></div>
+        <div class="lvl"><div class="lvl-lbl">T1</div><div class="lvl-val t1">$80.84</div></div>
+        <div class="lvl"><div class="lvl-lbl">T2</div><div class="lvl-val t2">$88.19</div></div>
+      </div>
+      <div class="indicators">
+        <span class="ind">RSI14 <b>56.7</b></span>
+        <span class="ind">RSI7 <b>52.9</b></span>
+        <span class="ind">MACD H <b>+1.13</b></span>
+      </div>
+      <div class="reasoning">
+        <span class="label">Por qué importa</span>
+        Mismo perfil que AAOI: RISER macro brutal pero ya muy estirado vs EMA200 ($26.42). El patrón aprueba solo DISCOVERY. Hoy -15% es purga sana <i>técnicamente</i> pero el riesgo es que vaya a buscar EMA50 ($53). <b>Solo</b> entrar si rompe los $80 al alza con volumen — no en este nivel.
+      </div>
+    </div>
+
+    <!-- NOW -->
+    <div class="opp">
+      <div class="badge specu">Especulativa · sin pattern</div>
+      <div class="ticker"><span class="sym">NOW</span><span class="name">ServiceNow</span></div>
+      <div class="price-row"><span class="price">$85.75</span><span class="chg neg">-16.80% hoy</span></div>
+      <div class="tags">
+        <span class="tag down">Trazo: DOWN 81%</span>
+        <span class="tag">Caída 2Y: -42%</span>
+        <span class="tag">SAR trend down</span>
+        <span class="tag">No pattern detected</span>
+      </div>
+      <div class="indicators">
+        <span class="ind">RSI14 <b class="oversold">36.0</b> · RSI7 <b class="oversold">32.1</b></span>
+        <span class="ind">MACD H <b>+0.51</b> (girando)</span>
+        <span class="ind">EMA9 <b>$95.49</b></span>
+        <span class="ind">SwingLow reciente <b>$81.24</b></span>
+      </div>
+      <div class="reasoning">
+        <span class="label">Por qué importa</span>
+        Cae más de un -16% tras un trimestre malo. Trazo dice DOWN con 81% de confianza, pero <b>el indicador de liquidity sweep marcó LONG_SETUP</b> el 20-04 (sweep de $98 con reclaim a $100), aunque después se anuló con el gap. RSI ya está en oversold y MACD girando. <b>No hay pattern formal del scanner</b>: esto es un trade de bottom-fishing puro. <b>NO entrar hoy</b>: espera que cierre por encima del swingLow $81.24 y forme base de al menos 3 días.
+      </div>
+    </div>
+
+    <!-- PLTR -->
+    <div class="opp">
+      <div class="badge media">Media convicción · paciente</div>
+      <div class="ticker"><span class="sym">PLTR</span><span class="name">Palantir</span></div>
+      <div class="price-row"><span class="price">$142.06</span><span class="chg neg">-6.92% hoy</span></div>
+      <div class="tags">
+        <span class="tag riser">Trazo: RISER 46%</span>
+        <span class="tag">Borderline SWING</span>
+        <span class="tag">V-Bottom retest-mid</span>
+        <span class="tag">Fase: valle</span>
+      </div>
+      <div class="levels">
+        <div class="lvl"><div class="lvl-lbl">Entrada</div><div class="lvl-val entry">$141.79</div></div>
+        <div class="lvl"><div class="lvl-lbl">Stop</div><div class="lvl-val stop">$127.61</div></div>
+        <div class="lvl"><div class="lvl-lbl">T1</div><div class="lvl-val t1">$146.48</div></div>
+        <div class="lvl"><div class="lvl-lbl">T2</div><div class="lvl-val t2">$152.62</div></div>
+      </div>
+      <div class="indicators">
+        <span class="ind">RSI14 <b>47.5</b> (neutro)</span>
+        <span class="ind">MACD H <b>+0.96</b></span>
+        <span class="ind">EMA9 ≈ EMA21 <b>$144.2</b></span>
+      </div>
+      <div class="reasoning">
+        <span class="label">Por qué importa</span>
+        Reset técnico: corrige -7% pero sin perder estructura macro. R/R de patrón es <b>solo 0.76x</b>, así que el trade fino está en jugar el rebote a $152 con stop ajustado. Mejor opción: <b>esperar a que rompa $146.5 al alza</b> y operar momentum. RSI=47 deja recorrido en ambas direcciones.
+      </div>
+    </div>
+
+    <!-- WST -->
+    <div class="opp">
+      <div class="badge evitar">CHASE · ya disparó</div>
+      <div class="ticker"><span class="sym">WST</span><span class="name">West Pharmaceutical</span></div>
+      <div class="price-row"><span class="price">$311.75</span><span class="chg pos">+13.61% hoy</span></div>
+      <div class="tags">
+        <span class="tag swing">SWING breakout 47%</span>
+        <span class="tag">Recuperación 106% rango</span>
+        <span class="tag">RSI14 81 (overbought)</span>
+      </div>
+      <div class="indicators">
+        <span class="ind">RSI14 <b class="overbought">81.2</b> · RSI7 <b class="overbought">89.2</b></span>
+        <span class="ind">MACD H <b>+3.58</b></span>
+        <span class="ind">EMA200 <b>$258.11</b> (lejos)</span>
+      </div>
+      <div class="reasoning">
+        <span class="label">Por qué importa (negativo)</span>
+        Listada en escaneos como SWING breakout, pero la subida de hoy lo deja en RSI extremo. Setup de <b>chase</b>. <b>Wait-list</b>: si pulla a EMA9 ($278) o EMA21 ($266) sin perder $260, segundo intento limpio. Hoy NO.
+      </div>
+    </div>
+
+    <!-- UNH -->
+    <div class="opp">
+      <div class="badge evitar">CHASE · RSI extremo</div>
+      <div class="ticker"><span class="sym">UNH</span><span class="name">UnitedHealth</span></div>
+      <div class="price-row"><span class="price">$353.34</span><span class="chg neu">-0.05% hoy</span></div>
+      <div class="tags">
+        <span class="tag swing">SWING 86%</span>
+        <span class="tag">V-Bottom breakout BALANCED</span>
+        <span class="tag">RSI14 81</span>
+      </div>
+      <div class="indicators">
+        <span class="ind">RSI14 <b class="overbought">81.4</b> · RSI7 <b class="overbought">92.2</b></span>
+        <span class="ind">EMA9 <b>$331.49</b> · EMA21 <b>$312.85</b></span>
+      </div>
+      <div class="reasoning">
+        <span class="label">Por qué importa (negativo)</span>
+        En tu lista de "Posibles Entradas". Aguanta plano hoy, pero <b>el rally previo lo dejó en zona muy sobrecomprada</b>. Aunque la estructura SWING es muy fuerte (86% conf), entrar en RSI 81 es jugar contra la estadística. <b>Espera retroceso a EMA21 ($312)</b> para entrada limpia con stop estructural.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CARTERA POR CATEGORIA -->
+<section id="cartera">
+  <h2 class="heading">Tu cartera y listas — clasificación Trazo</h2>
+
+  <div class="trazo-cats">
+    <div class="trazo-cat">
+      <h3 style="color:var(--blue)">SWING (21) <span style="color:var(--text-faint);font-weight:400;text-transform:none;letter-spacing:normal">caída + remontada activa</span></h3>
+      <ul>
+        <li><span class="sym">MP</span> <span class="conf">98% · pullback</span></li>
+        <li><span class="sym">IREN</span> <span class="conf">97% confident</span></li>
+        <li><span class="sym">NFLX</span> <span class="conf">88% confident</span></li>
+        <li><span class="sym">UNH</span> <span class="conf">86% confident</span></li>
+        <li><span class="sym">CE</span> <span class="conf">84% · pullback</span></li>
+        <li><span class="sym">NIO</span> <span class="conf">83% · pullback</span></li>
+        <li><span class="sym">LRN</span> <span class="conf">83% confident</span></li>
+        <li><span class="sym">PANW</span> <span class="conf">78% confident</span></li>
+        <li><span class="sym">MSFT</span> <span class="conf">78% confident</span></li>
+        <li><span class="sym">META</span> <span class="conf">75% confident</span></li>
+        <li><span class="sym">DOW</span> <span class="conf">74% · breakout</span></li>
+        <li><span class="sym">APLD</span> <span class="conf">71% · pullback</span></li>
+        <li><span class="sym">REGN</span> <span class="conf">69% confident</span></li>
+        <li><span class="sym">PSKY</span> <span class="conf">65% confident</span></li>
+        <li><span class="sym">ORCL</span> <span class="conf">62% confident</span></li>
+        <li><span class="sym">MELI</span> <span class="conf">60% confident</span></li>
+        <li><span class="sym">COF</span> <span class="conf">53% (borderline RISER)</span></li>
+        <li><span class="sym">STZ</span> <span class="conf">52% confident</span></li>
+        <li><span class="sym">SHOP</span> <span class="conf">48% (borderline LATERAL)</span></li>
+        <li><span class="sym">WST</span> <span class="conf">47% · breakout</span></li>
+        <li><span class="sym">SEDG</span> <span class="conf">25% uncertain</span></li>
+      </ul>
+    </div>
+
+    <div class="trazo-cat">
+      <h3 style="color:var(--green)">RISER (26) <span style="color:var(--text-faint);font-weight:400;text-transform:none;letter-spacing:normal">tendencia alcista sin crash</span></h3>
+      <ul>
+        <li><span class="sym">GILD</span> <span class="conf">70% confident</span></li>
+        <li><span class="sym">AMZN</span> <span class="conf">67% confident</span></li>
+        <li><span class="sym">TMUS</span> <span class="conf">66% confident</span></li>
+        <li><span class="sym">ON</span> <span class="conf">66% confident</span></li>
+        <li><span class="sym">AAOI</span> <span class="conf">65% confident</span></li>
+        <li><span class="sym">GOOG</span> <span class="conf">64% confident</span></li>
+        <li><span class="sym">LITE</span> <span class="conf">64% confident</span></li>
+        <li><span class="sym">TXN</span> <span class="conf">64% confident</span></li>
+        <li><span class="sym">NBIS</span> <span class="conf">63% confident</span></li>
+        <li><span class="sym">MTSI</span> <span class="conf">63% confident</span></li>
+        <li><span class="sym">LLY</span> <span class="conf">62% confident</span></li>
+        <li><span class="sym">MRVL</span> <span class="conf">61% confident</span></li>
+        <li><span class="sym">AMD</span> <span class="conf">61% confident</span></li>
+        <li><span class="sym">MEDP</span> <span class="conf">61% confident</span></li>
+        <li><span class="sym">AXTI</span> <span class="conf">60% confident</span></li>
+        <li><span class="sym">COHR</span> <span class="conf">60% confident</span></li>
+        <li><span class="sym">MU</span> <span class="conf">60% confident</span></li>
+        <li><span class="sym">LPTH</span> <span class="conf">59% confident</span></li>
+        <li><span class="sym">TSLA</span> <span class="conf">59% confident</span></li>
+        <li><span class="sym">NVDA</span> <span class="conf">53% confident</span></li>
+        <li><span class="sym">SMCI</span> <span class="conf">53% (border DOWN)</span></li>
+        <li><span class="sym">STM</span> <span class="conf">51% confident</span></li>
+        <li><span class="sym">URI</span> <span class="conf">46% confident</span></li>
+        <li><span class="sym">PLTR</span> <span class="conf">46% (border SWING)</span></li>
+        <li><span class="sym">FCX</span> <span class="conf">36% uncertain</span></li>
+        <li><span class="sym">FANG</span> <span class="conf">30% (border SWING)</span></li>
+      </ul>
+    </div>
+
+    <div class="trazo-cat">
+      <h3 style="color:var(--red)">DOWN (5) <span style="color:var(--text-faint);font-weight:400;text-transform:none;letter-spacing:normal">caída sin reversal</span></h3>
+      <ul>
+        <li><span class="sym">NOW</span> <span class="conf">81% (-42% en 2Y)</span></li>
+        <li><span class="sym">WEX</span> <span class="conf">71% (-34% en 2Y)</span></li>
+        <li><span class="sym">SNAP</span> <span class="conf">65% (-52% / rally +54%)</span></li>
+        <li><span class="sym">TMO</span> <span class="conf">49% (border LATERAL, -19%)</span></li>
+        <li><span class="sym">QCOM</span> <span class="conf">46% (border LATERAL, -17%)</span></li>
+      </ul>
+    </div>
+
+    <div class="trazo-cat">
+      <h3 style="color:var(--text-dim)">LATERAL (8) <span style="color:var(--text-faint);font-weight:400;text-transform:none;letter-spacing:normal">sin patrón claro</span></h3>
+      <ul>
+        <li><span class="sym">MCHP</span> <span class="conf">31% (border SWING)</span></li>
+        <li><span class="sym">LVS</span> <span class="conf">31% staircase-down</span></li>
+        <li><span class="sym">INTC</span> <span class="conf">30% (border RISER)</span></li>
+        <li><span class="sym">ALGN</span> <span class="conf">20% staircase-down</span></li>
+        <li><span class="sym">FSLY</span> <span class="conf">20% (border SWING)</span></li>
+        <li><span class="sym">LULU</span> <span class="conf">20% staircase-down</span></li>
+        <li><span class="sym">MOH</span> <span class="conf">20% staircase-down</span></li>
+        <li><span class="sym">FIG</span> <span class="conf">15% staircase-down</span></li>
+      </ul>
+    </div>
+
+    <div class="trazo-cat">
+      <h3 style="color:var(--gold)">TOP (1) <span style="color:var(--text-faint);font-weight:400;text-transform:none;letter-spacing:normal">cerca de ATH 3Y</span></h3>
+      <ul>
+        <li><span class="sym">WBD</span> <span class="conf">70% · 90% del ATH 3Y</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- MOVERS YAHOO -->
+<section id="movers">
+  <h2 class="heading">Movers de Yahoo · top del día <span class="sub">25 por categoría</span></h2>
+
+  <h3 style="font-size:13px;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 8px;">Top gainers</h3>
+  <div class="tbl-wrap">
+  <table class="t">
+    <thead><tr><th>#</th><th>Ticker</th><th>Nombre</th><th class="num">Precio</th><th class="num">Cambio %</th><th class="num">Vol vs media 3M</th><th>Lectura rápida</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><b>URI</b></td><td>United Rentals</td><td class="num">$977.65</td><td class="num pos">+21.76%</td><td class="num">1.7x</td><td>Earnings beat. RISER pero ya muy lejos de medias.</td></tr>
+      <tr><td>2</td><td><b>TXN</b></td><td>Texas Instruments</td><td class="num">$278.88</td><td class="num pos">+18.01%</td><td class="num">2.7x</td><td>Earnings strong. RSI14=88, NO chase.</td></tr>
+      <tr><td>3</td><td><b>EQPT</b></td><td>EquipmentShare</td><td class="num">$25.01</td><td class="num pos">+16.43%</td><td class="num">2.3x</td><td>Small cap industrial, alto riesgo.</td></tr>
+      <tr><td>4</td><td><b>PENN</b></td><td>PENN Entertainment</td><td class="num">$17.04</td><td class="num pos">+15.34%</td><td class="num">1.7x</td><td>Casinos, M&amp;A speculation. Ignorar.</td></tr>
+      <tr><td>5</td><td><b>HRI</b></td><td>Herc Holdings</td><td class="num">$124.84</td><td class="num pos">+15.74%</td><td class="num">1.8x</td><td>Sympathy con URI (rentals).</td></tr>
+      <tr><td>6</td><td><b>WST</b></td><td>West Pharmaceutical</td><td class="num">$312.39</td><td class="num pos">+13.84%</td><td class="num">2.0x</td><td>SWING breakout pero RSI14=81. Esperar pullback.</td></tr>
+      <tr><td>7</td><td><b>STM</b></td><td>STMicroelectronics</td><td class="num">$50.61</td><td class="num pos">+12.82%</td><td class="num">2.2x</td><td>RISER + RSI14=86. Chase, no.</td></tr>
+      <tr><td>8</td><td><b>MOH</b></td><td>Molina Healthcare</td><td class="num">$171.49</td><td class="num pos">+12.08%</td><td class="num">1.3x</td><td>LATERAL en staircase-down. Rebote técnico.</td></tr>
+      <tr><td>9</td><td><b>APLD</b></td><td>Applied Digital</td><td class="num">$36.24</td><td class="num pos">+11.75%</td><td class="num">2.0x</td><td>SWING pullback OK. RSI14=68. Vigilar.</td></tr>
+      <tr><td>10</td><td><b>SEDG</b></td><td>SolarEdge</td><td class="num">$47.51</td><td class="num pos">+11.53%</td><td class="num">1.1x</td><td>SWING uncertain (recuperación 12%). Skip.</td></tr>
+      <tr><td>11</td><td><b>ON</b></td><td>ON Semiconductor</td><td class="num">$97.78</td><td class="num pos">+9.88%</td><td class="num">1.7x</td><td>RISER + RSI14=88. Esperar.</td></tr>
+      <tr><td>12</td><td><b>MCHP</b></td><td>Microchip Tech</td><td class="num">$90.17</td><td class="num pos">+9.32%</td><td class="num">1.3x</td><td>LATERAL borderline SWING + RSI=85. Tarde.</td></tr>
+      <tr><td>13</td><td><b>CMCSA</b></td><td>Comcast</td><td class="num">$31.96</td><td class="num pos">+8.82%</td><td class="num">1.0x</td><td>Earnings beat sin volumen extra. Reactivo.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="font-size:13px;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin:24px 0 8px;">Top losers</h3>
+  <div class="tbl-wrap">
+  <table class="t">
+    <thead><tr><th>#</th><th>Ticker</th><th>Nombre</th><th class="num">Precio</th><th class="num">Cambio %</th><th>Lectura rápida</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><b>CAR</b></td><td>Avis Budget</td><td class="num">$220.58</td><td class="num neg">-50.31%</td><td>Catástrofe (probable noticia/split). Ignorar.</td></tr>
+      <tr><td>2</td><td><b>MEDP</b></td><td>Medpace</td><td class="num">$397.97</td><td class="num neg">-21.73%</td><td>RISER + RSI7=15 + R/R 6.22x. <b>Especulativa de calidad</b>.</td></tr>
+      <tr><td>3</td><td><b>YSS</b></td><td>York Space Systems</td><td class="num">$35.57</td><td class="num neg">-18.15%</td><td>Small cap espacio. Ignorar.</td></tr>
+      <tr><td>4</td><td><b>WEX</b></td><td>WEX Inc</td><td class="num">$153.29</td><td class="num neg">-17.11%</td><td>DOWN 71% conf. Caída estructural, no oportunidad.</td></tr>
+      <tr><td>5</td><td><b>NOW</b></td><td>ServiceNow</td><td class="num">$85.68</td><td class="num neg">-16.87%</td><td>DOWN 81% pero RSI oversold. <b>Bottom-fishing especulativo</b>.</td></tr>
+      <tr><td>6</td><td><b>AXTI</b></td><td>AXT Inc</td><td class="num">$73.52</td><td class="num neg">-15.44%</td><td>RISER + en tu lista Fotónica. Esperar reversal.</td></tr>
+      <tr><td>7</td><td><b>RDW</b></td><td>Redwire</td><td class="num">$10.17</td><td class="num neg">-14.76%</td><td>Small cap espacio. Volátil.</td></tr>
+      <tr><td>8</td><td><b>FCX</b></td><td>Freeport-McMoRan</td><td class="num">$62.08</td><td class="num neg">-11.78%</td><td>RISER border SWING. V-Bottom retest-mid R/R 1.5x.</td></tr>
+      <tr><td>9</td><td><b>LULU</b></td><td>Lululemon</td><td class="num">$144.28</td><td class="num neg">-11.73%</td><td>LATERAL staircase-down. NO bottom-fish.</td></tr>
+      <tr><td>10</td><td><b>TMO</b></td><td>Thermo Fisher</td><td class="num">$462.65</td><td class="num neg">-9.99%</td><td>DOWN border LATERAL + V-Bottom retest-deep BALANCED. <b>Top pick reactivo</b>.</td></tr>
+      <tr><td>11</td><td><b>FIG</b></td><td>Figma</td><td class="num">$17.26</td><td class="num neg">-9.99%</td><td>LATERAL staircase-down. IPO reciente, evitar.</td></tr>
+      <tr><td>12</td><td><b>AAOI</b></td><td>Applied Optoelectronics</td><td class="num">$135.47</td><td class="num neg">-9.34%</td><td>RISER + en tu lista Fotónica. Esperar reversal.</td></tr>
+      <tr><td>13</td><td><b>LCID</b></td><td>Lucid Group</td><td class="num">$6.28</td><td class="num neg">-9.12%</td><td>EV speculativo. Ignorar.</td></tr>
+      <tr><td>14</td><td><b>LVS</b></td><td>Las Vegas Sands</td><td class="num">$51.63</td><td class="num neg">-9.18%</td><td>SWING degradado staircase-down. NO.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="font-size:13px;color:var(--blue);text-transform:uppercase;letter-spacing:.08em;margin:24px 0 8px;">Most actives (interés institucional)</h3>
+  <div class="tbl-wrap">
+  <table class="t">
+    <thead><tr><th>#</th><th>Ticker</th><th class="num">Volumen</th><th class="num">Vol vs media 3M</th><th class="num">Cambio %</th><th>Notas</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><b>NOK</b></td><td class="num">159.6M</td><td class="num">2.7x</td><td class="num pos">+4.21%</td><td>Anuncio relevante. Out of universe.</td></tr>
+      <tr><td>2</td><td><b>QS</b></td><td class="num">101.3M</td><td class="num pos">7.8x</td><td class="num pos">+0.48%</td><td>Squeeze speculativo. Ignorar.</td></tr>
+      <tr><td>3</td><td><b>INTC</b></td><td class="num">89.2M</td><td class="num">0.9x</td><td class="num pos">+2.31%</td><td>LATERAL border RISER. Volumen normal.</td></tr>
+      <tr><td>4</td><td><b>NVDA</b></td><td class="num">86.7M</td><td class="num">0.5x</td><td class="num neg">-1.80%</td><td>Volumen flojo, caída suave. Sin alarmas.</td></tr>
+      <tr><td>5</td><td><b>TSLA</b></td><td class="num">80.6M</td><td class="num">1.3x</td><td class="num neg">-3.65%</td><td>RISER 59%. Pullback ordenado. Vigilar EMA50.</td></tr>
+      <tr><td>6</td><td><b>NOW</b></td><td class="num">71.8M</td><td class="num">3.3x</td><td class="num neg">-16.87%</td><td>Capitulación con volumen. Posible suelo.</td></tr>
+      <tr><td>7</td><td><b>SMCI</b></td><td class="num">39.2M</td><td class="num">1.1x</td><td class="num neg">-7.81%</td><td>RISER border DOWN. Estructura debilitándose.</td></tr>
+      <tr><td>8</td><td><b>PLTR</b></td><td class="num">46.3M</td><td class="num">0.9x</td><td class="num neg">-7.09%</td><td>Volumen normal. Reset técnico OK.</td></tr>
+      <tr><td>9</td><td><b>MU</b></td><td class="num">32.3M</td><td class="num">0.8x</td><td class="num neg">-2.47%</td><td>RISER 60%. Sin alarmas hoy.</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- EVITAR -->
+<section id="evitar">
+  <h2 class="heading">Evitar / Watchout</h2>
+
+  <div class="opp-grid">
+    <div class="opp" style="border-color: rgba(248,113,113,0.3);">
+      <div class="badge evitar">Estructura rota</div>
+      <div class="ticker"><span class="sym">WEX</span><span class="name">WEX Inc.</span></div>
+      <div class="price-row"><span class="price">$153.38</span><span class="chg neg">-17.06% hoy</span></div>
+      <p style="margin:6px 0 0;color:var(--text);font-size:13px;">DOWN 71% confianza, -34% en 2Y. La caída de hoy <b>continúa la tendencia</b>, no la rompe. <b>No comprar</b>.</p>
+    </div>
+
+    <div class="opp" style="border-color: rgba(248,113,113,0.3);">
+      <div class="badge evitar">LATERAL degradado</div>
+      <div class="ticker"><span class="sym">LULU</span><span class="name">Lululemon</span></div>
+      <div class="price-row"><span class="price">$143.41</span><span class="chg neg">-12.26% hoy</span></div>
+      <p style="margin:6px 0 0;color:var(--text);font-size:13px;">SWING degradado a LATERAL por valles decrecientes (staircase-down). Sin estructura para entrada técnica. Esperar a que aparezca un patrón formal.</p>
+    </div>
+
+    <div class="opp" style="border-color: rgba(248,113,113,0.3);">
+      <div class="badge evitar">RSI extremo</div>
+      <div class="ticker"><span class="sym">TXN · ON · STM · MCHP</span><span class="name">Semis tras earnings</span></div>
+      <div class="price-row"><span class="chg pos">+9% a +18% hoy</span></div>
+      <p style="margin:6px 0 0;color:var(--text);font-size:13px;">Todos con RSI14 entre 85-88. Estructuralmente RISER pero entrar en <b>chase</b> es estadísticamente perdedor. Lista de espera: pullback a EMA9-EMA21 sin perder EMA50.</p>
+    </div>
+
+    <div class="opp" style="border-color: rgba(248,113,113,0.3);">
+      <div class="badge evitar">Sin estructura</div>
+      <div class="ticker"><span class="sym">CAR · MEDP gap</span><span class="name">Eventos catastróficos</span></div>
+      <p style="margin:6px 0 0;color:var(--text);font-size:13px;"><b>CAR -50%</b> es probablemente un evento corporativo (split o noticia regulatoria), no operable como técnico. <b>MEDP -22%</b> sí es técnicamente interesante (ver oportunidades), pero hay riesgo de gap-down adicional mañana.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PLAN -->
+<section id="plan">
+  <h2 class="heading">Plan para mañana 24-04</h2>
+
+  <div class="plan">
+    <div class="plan-card">
+      <h3>Apertura (15:30 ES)</h3>
+      <ul>
+        <li><b>TMO</b>: si abre cerca de $462 con vela de reversal en 5min, entrada parcial. Stop estructural en $416.</li>
+        <li><b>MEDP</b>: <b>NO</b> entrar en apertura. Esperar primera hora; si forma martillo o engulfing alcista, entrada con tamaño 50%.</li>
+        <li><b>NOW</b>: vigila $81.24 (swingLow). Solo si lo respeta y cierra arriba al final del día.</li>
+      </ul>
+    </div>
+
+    <div class="plan-card">
+      <h3>Setups limpios</h3>
+      <ul>
+        <li><b>DOW</b>: entrada limpia en $38, stop $34.60. R/R 2.22x. Más probable de los del informe.</li>
+        <li><b>MSFT</b>: entrada limpia en $415-416, stop $376. R/R 3.25x.</li>
+        <li><b>META</b>: entrada $658, stop $592. Buen complemento.</li>
+        <li><b>PANW</b>: entrada $173, stop $156. Defensivo dentro de tech.</li>
+      </ul>
+    </div>
+
+    <div class="plan-card">
+      <h3>Posición abierta</h3>
+      <ul>
+        <li><b>COF</b>: cierra a $195.95 (-1.7%). Trazo SWING 53%. RSI=51. Sin alarmas. <b>Stop estructural en $175</b> (último swingLow). Mantener.</li>
+      </ul>
+    </div>
+
+    <div class="plan-card">
+      <h3>Wait-list (chase: solo en pullback)</h3>
+      <ul>
+        <li><b>WST</b>: pullback a $278 sin perder $260.</li>
+        <li><b>UNH</b>: pullback a EMA21 ($312).</li>
+        <li><b>TXN, ON, STM, MCHP</b>: esperar a que RSI14 vuelva a 60-65.</li>
+        <li><b>AAOI, AXTI</b>: solo si rompen al alza máximos previos con volumen.</li>
+      </ul>
+    </div>
+
+    <div class="plan-card">
+      <h3>Trade Republic — orden tipo</h3>
+      <ul>
+        <li>Tamaño por trade: <b>1% del capital</b> arriesgado al stop (no al precio).</li>
+        <li>Para R/R 2x: posición = riesgo_tolerado / (entry-stop).</li>
+        <li>Ej. DOW: entry $38 / stop $34.6 = $3.4 de riesgo. Si arriesgas €100, posición = €1117 (~30 acciones).</li>
+        <li>Recordatorio horario: TMO, MEDP, NOW abren en EE.UU. a las <b>15:30 hora española</b>. Trade Republic permite operar sin problema en ese horario.</li>
+      </ul>
+    </div>
+
+    <div class="plan-card">
+      <h3>Macro a vigilar</h3>
+      <ul>
+        <li>VIX: 19.14. Si rompe 22 → reducir exposición.</li>
+        <li>Bono 10Y: 4.32%. Si supera 4.5% → más presión sobre tech.</li>
+        <li>Sectores defensivos están "correctos" (XLP +2.4%): si mañana <b>también suben</b>, confirma rotación. Si bajan, hoy fue solo cobertura.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Informe generado a partir de scanners propios (Trazo + Patrones) + Yahoo Finance.
+  <br>Cotizaciones del cierre 23-abr-2026 ~18:54 UTC.
+  <br>No es asesoramiento de inversión.
+</footer>
+
+</div>
+<script>
+  document.getElementById('genTime').textContent = new Date().toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' });
+</script>
+</body>
+</html>

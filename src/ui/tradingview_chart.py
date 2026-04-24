@@ -13,7 +13,7 @@ def render_tv_chart(
     Renders TradingView Lightweight Charts via CDN using st.components.v1.html.
     Includes a radio selector in Streamlit for switching views (Candles, Mountain, Pivots).
     """
-    # 1. Selector de vista a sobre del gràfic (Streamlit)
+    # 1. View selector above the chart (Streamlit)
     view = st.radio(
         "",
         options=["Candles", "Mountain", "Pivots"],
@@ -146,7 +146,7 @@ def render_tv_chart(
         lineSeries.setData(lineData);
         lineSeries.applyOptions({{ visible: {show_line} }});
 
-        // Línia de pivots RDP
+        // RDP pivots line
         const pivotData = {pivot_json};
         if (pivotData.length > 0) {{
           const pivotSeries = chart.addLineSeries({{
@@ -160,7 +160,7 @@ def render_tv_chart(
           pivotSeries.setData(pivotData);
           pivotSeries.applyOptions({{ visible: {show_pivots} }});
           
-          // Markers per als pivots
+          // Markers for pivots
           const markers = [];
           if ({show_pivots}) {{
               {pivot_markers_json}.forEach(p => {{

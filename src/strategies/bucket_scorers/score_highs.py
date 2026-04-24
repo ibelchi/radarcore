@@ -6,10 +6,10 @@ class HighsScorer(BaseBucketScorer):
         total_score = 0
         close = hist_data['Close'].iloc[-1]
         
-        # Preu dins 2% màxim 60d
+        # Price within 2% of 60d high
         high_60d = hist_data['High'].tail(60).max()
-        dist_maxim_pct = (high_60d - close) / close * 100 if close > 0 else 0
-        if dist_maxim_pct <= 2:
+        distance_high_pct = (high_60d - close) / close * 100 if close > 0 else 0
+        if distance_high_pct <= 2:
             total_score += 50
             
         # RSI 14 simple
@@ -28,20 +28,20 @@ class HighsScorer(BaseBucketScorer):
         # Volum decreixent 5 dies respecte la de 20
         vol_5d = hist_data['Volume'].tail(5).mean()
         vol_20d = hist_data['Volume'].tail(20).mean()
-        vol_decreixent = vol_5d < vol_20d
+        vol_decreasing = vol_5d < vol_20d
         
-        if vol_decreixent:
+        if vol_decreasing:
             total_score += 20
             
-        rsi_str = "sobrecomprat" if rsi > 70 else "neutre"
-        reasoning = f"En màxims, RSI {rsi:.1f} - {rsi_str}"
+        rsi_str = "overbought" if rsi > 70 else "neutral"
+        reasoning = f"At highs, RSI {rsi:.1f} - {rsi_str}"
         
         return {
             "score": min(100, total_score),
             "reasoning": reasoning,
             "key_metrics": {
-                "dist_maxim_pct": dist_maxim_pct,
+                "distance_high_pct": distance_high_pct,
                 "rsi": rsi,
-                "volum_trend": "decreixent" if vol_decreixent else "creixent"
+                "volume_trend": "decreasing" if vol_decreasing else "increasing"
             }
         }

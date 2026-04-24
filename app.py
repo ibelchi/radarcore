@@ -11,12 +11,12 @@ def check_password() -> bool:
     if st.session_state.get("authenticated"):
         return True
     pwd = st.text_input("Password", type="password", key="login_pwd")
-    if st.button("Entrar", key="login_btn"):
+    if st.button("Enter", key="login_btn"):
         if pwd == st.secrets.get("passwords", {}).get("admin", ""):
             st.session_state["authenticated"] = True
             st.rerun()
         else:
-            st.error("Password incorrecta")
+            st.error("Incorrect password")
     return False
 
 def is_cloud() -> bool:
@@ -52,6 +52,36 @@ from src.ai.report_generator import ReportGenerator
 from src.data.ingestion import get_company_info, get_historical_data
 from src.logging.scan_logger import ScanLogger
 from src.logging.scan_report import generate_scan_report
+from src.utils.data_utils import normalize_yfinance_df
+from src.data.macro_fetcher import get_macro_context
+from src.utils.analysis_utils import is_not_recommended_today
+from src.reporting.html_report_builder import generate_html_report
+from src.utils.db_migration import backfill_rsi_and_vol
+
+# --- DB BACKFILL ---
+if "backfill_done" not in st.session_state:
+    db_init = SessionLocal()
+    try:
+        with st.spinner("Updating historical data..."):
+            backfill_rsi_and_vol(db_init)
+        st.session_state["backfill_done"] = True
+    finally:
+        db_init.close()
+
+# --- INITIALIZE HTML REPORT ---
+if "last_scan_html" not in st.session_state:
+    db_init = SessionLocal()
+    try:
+        recent_opps = db_init.query(Opportunity).order_by(Opportunity.date_detected.desc()).limit(30).all()
+        if recent_opps:
+            st.session_state["last_scan_html"] = generate_html_report(
+                opportunities=recent_opps,
+                macro_data=get_macro_context()
+            )
+    except Exception as e:
+        print(f"Error initializing HTML report: {e}")
+    finally:
+        db_init.close()
 
 # --- GLOBAL LOGGER ---
 if "scan_logger" not in st.session_state:
@@ -150,6 +180,7 @@ with st.sidebar:
     
     use_universe_filter = st.toggle(
         "Pre-filter universe",
+        value=True,
         key="use_universe_filter",
         help="ON: applies liquidity and zombie filters before scanning (~250 stocks). OFF: scans all tickers directly, the bucketer handles the noise (~500 stocks)."
     )
@@ -187,21 +218,33 @@ with st.sidebar:
     report_lang = st.selectbox(
         "AI Report Language",
         ["Catalan", "Spanish", "English"],
-        index=0,
+        index=2,
         help="Select the language for the AI-generated research reports."
     )
 
     st.divider()
-    if scan_logger.end_time:
-        st.subheader("📋 Last Scan Report")
-        report_md = generate_scan_report(scan_logger)
-        st.download_button(
-            "Download Scan Report",
-            report_md,
-            file_name=f"radarcore_scan_{datetime.now().strftime('%Y%m%d_%H%M')}.md",
-            mime="text/markdown",
-            use_container_width=True
-        )
+    if scan_logger.end_time or "last_scan_html" in st.session_state:
+        st.subheader("📋 Last Scan Reports")
+        
+        if scan_logger.end_time:
+            report_md = generate_scan_report(scan_logger)
+            st.download_button(
+                "📄 Markdown Report",
+                report_md,
+                file_name=f"radarcore_scan_{datetime.now().strftime('%Y%m%d_%H%M')}.md",
+                mime="text/markdown",
+                use_container_width=True
+            )
+        
+        if "last_scan_html" in st.session_state:
+            st.download_button(
+                label="🌐 Download HTML Report",
+                data=st.session_state["last_scan_html"],
+                file_name=f"radarcore_{datetime.now().strftime('%Y%m%d')}.html",
+                mime="text/html",
+                help="Visual HTML report — open in any browser",
+                use_container_width=True
+            )
 
     st.divider()
     st.caption(f"RadarCore - Build Version: {VERSION}")
@@ -245,6 +288,7 @@ with tab_scanner:
             st.caption("🟢 **Live** scanning against internet directories.")
             
         limit = st.number_input("Symbol limit (0 for full market)", min_value=0, max_value=4000, value=0)
+
         start_btn = st.button("Run Scan", type="primary", use_container_width=True)
         
         st.divider()
@@ -366,6 +410,18 @@ with tab_scanner:
                     # END SCAN LOGGING
                     scan_logger.end_scan()
                     
+                    # GENERATE HTML REPORT
+                    db_report = SessionLocal()
+                    try:
+                        last_opps = db_report.query(Opportunity).order_by(Opportunity.date_detected.desc()).limit(30).all()
+                        st.session_state["last_scan_html"] = generate_html_report(
+                            opportunities=last_opps,
+                            macro_data=get_macro_context(),
+                            scan_config=overrides
+                        )
+                    finally:
+                        db_report.close()
+                    
                     status.update(label="Scan completed!", state="complete", expanded=False)
                     
                     if found_count[0] > 0:
@@ -411,7 +467,8 @@ with tab_scanner:
                 try:
                     info = get_company_info(manual_ticker)
                     hist = get_historical_data(manual_ticker)
-                    if hist.empty:
+                    hist = normalize_yfinance_df(hist, manual_ticker)
+                    if hist is None or hist.empty:
                         st.error("No data found.")
                     else:
                         curr_p = hist['Close'].iloc[-1]
@@ -567,6 +624,28 @@ with tab_history:
     st.header("Detected Opportunities")
     db = SessionLocal()
     
+    # --- MACRO CONTEXT ---
+    macro = get_macro_context()
+    m_cols = st.columns(5)
+    
+    indicators = ["SPY", "QQQ", "VIX", "TNX", "DXY"]
+    for i, key in enumerate(indicators):
+        data = macro.get(key)
+        if data and data["value"] is not None:
+            m_cols[i].metric(
+                label=data["name"],
+                value=f"{data['value']:.2f}",
+                delta=f"{data['change_pct']:+.2f}%"
+            )
+        else:
+            m_cols[i].metric(label=key, value="N/A")
+    
+    if macro["alerta_vix"]:
+        st.warning("⚠️ VIX > 25 — High volatility market. Consider reducing position size.")
+        
+    st.caption(f"Macro data updated at {macro['timestamp']}")
+    st.divider()
+    
     # Auto-migration for confidence column
     try:
         from sqlalchemy import text
@@ -600,7 +679,10 @@ with tab_history:
             with col_sys:
                 st.write("")
                 st.write("")
-                show_systemic = st.checkbox("🔍 Mostra Sistèmiques", value=False)
+                show_systemic = st.checkbox("🔍 Show Systemic", value=False)
+
+            # is_not_recommended_today imported from src.utils.analysis_utils
+
 
             def matches_bucket_filter(pattern: str, filter_val: str) -> bool:
                 mapping = {
@@ -657,19 +739,48 @@ with tab_history:
                 if "upside_to_ath3y" in m:
                     upside_str = f"{m.get('upside_to_ath3y', 0):.1f}%"
 
+                # PART C — Color condicional al RSI
+                rsi_val = m.get("rsi_14")
+                if rsi_val is not None:
+                    if rsi_val >= 70: rsi_display = f"🔴 {rsi_val:.0f}"
+                    elif rsi_val <= 30: rsi_display = f"🟢 {rsi_val:.0f}"
+                    else: rsi_display = f"⚪ {rsi_val:.0f}"
+                else:
+                    rsi_display = "N/A"
+
+                # MILLORA 4 — Volum ratio
+                vol_ratio = m.get("vol_ratio_3m")
+                if vol_ratio is None: 
+                    vol_display = "N/A"
+                elif vol_ratio >= 2.0:  vol_display = f"🔵 {vol_ratio:.1f}x"
+                elif vol_ratio >= 1.5:  vol_display = f"🟡 {vol_ratio:.1f}x"
+                elif vol_ratio < 0.5:   vol_display = f"⬜ {vol_ratio:.1f}x"
+                else:                   vol_display = f"⚪ {vol_ratio:.1f}x"
+
+                # Millora 3: Classificació recomanació
+
+                not_recommended, reason = is_not_recommended_today(m)
+
                 data.append({
                     "Symbol": f"https://es.finance.yahoo.com/quote/{op.symbol}/",
                     "Company": op.company_name or op.symbol,
-                    "Estat": nou_estat,
+                    "Status": nou_estat,
                     "Drop %": f"{drop_val:.1f}%",
                     "Rebound %": f"{rebound_val:.1f}%",
                     "Pattern": pattern_label,
+                    "RSI": rsi_display,
+                    "Vol": vol_display,
                     "Phase": phase_str,
+
                     "Upside 3Y": upside_str,
                     "Conf.": f"{confidence:.1f}%",
                     "Date": op.date_detected.strftime('%Y-%m-%d'),
-                    "id": op.id # Hidden but used for selection
+                    "id": op.id, # Hidden but used for selection
+                    "_not_recommended": not_recommended,
+                    "_not_rec_reason": reason
                 })
+
+
             
             df_display = pd.DataFrame(data)
             
@@ -694,29 +805,72 @@ with tab_history:
                     ascending=[True, False, False]
                 ).drop(columns=["_phase_order", "_conf_num", "_upside_num"]).reset_index(drop=True)
             
-            # Comptador sota els filtres
-            st.caption(f"{len(df_display)} results out of {len(opportunities)}")
+            # Millora 3: Separar DataFrames
+            df_ok = df_display[df_display["_not_recommended"] == False].copy()
+            df_nok = df_display[df_display["_not_recommended"] == True].copy()
+            
+            # Results counter
+            st.caption(f"{len(df_ok)} actionable opportunities · {len(df_nok)} discouraged today")
 
-            # -----------------------------------------------------------
-            # DATAFRAME — accedim a l'estat intern directament via key
-            # -----------------------------------------------------------
+            # Taula principal — oportunitats accionables
             st.dataframe(
-                df_display,
+                df_ok.drop(columns=["_not_recommended", "_not_rec_reason"]),
                 key="history_table_df",
                 column_config={
                     "id": None,
                     "Symbol": st.column_config.LinkColumn(
                         "Symbol",
                         display_text=r"https://es\.finance\.yahoo\.com/quote/(.*?)/"
+                    ),
+                    "RSI": st.column_config.TextColumn("RSI(14)", width="small"),
+                    "Vol": st.column_config.TextColumn(
+                        "Vol 3M", width="small",
+                        help="Today's volume vs 3-month average. 🔵 >2x = possible institutional interest"
                     )
                 },
+
                 use_container_width=True,
                 hide_index=True,
                 on_select="rerun",
                 selection_mode="multi-row"
             )
             
-            # Llegim la selecció directament del session_state del widget
+            # Separador visual
+            if len(df_nok) > 0:
+                st.markdown("---")
+                with st.expander(
+                    f"⚠️ {len(df_nok)} detected but not recommended today (high RSI, LATE phase or imminent earnings)",
+                    expanded=True
+                ):
+                    df_nok_display = df_nok.copy()
+                    df_nok_display["Reason"] = df_nok["_not_rec_reason"]
+                    
+                    st.caption(
+                        "Technically detected but with risk factors "
+                        "advising against entry today. "
+                        "Keep for future monitoring."
+                    )
+                    st.dataframe(
+                        df_nok_display.drop(columns=["_not_recommended", "_not_rec_reason"]),
+                        column_config={
+                            "id": None,
+                            "Symbol": st.column_config.LinkColumn(
+                                "Symbol",
+                                display_text=r"https://es\.finance\.yahoo\.com/quote/(.*?)/"
+                            ),
+                            "RSI": st.column_config.TextColumn("RSI(14)", width="small"),
+                            "Vol": st.column_config.TextColumn(
+                                "Vol 3M", width="small",
+                                help="Today's volume vs 3-month average. 🔵 >2x = possible institutional interest"
+                            ),
+                            "Reason": st.column_config.TextColumn("Reason", width="medium")
+
+                        },
+                        use_container_width=True,
+                        hide_index=True
+                    )
+
+            # Llegim la selecció directament del session_state del widget (només de la taula OK)
             raw_selection = st.session_state.get("history_table_df", {})
             if hasattr(raw_selection, "selection"):
                 selected_indices = raw_selection.selection.rows or []
@@ -730,6 +884,7 @@ with tab_history:
                 st.caption(f"Selected: {len(selected_indices)} opportunity(s)")
             else:
                 st.caption("Select one or more rows to activate actions.")
+
 
             # --- ACTION AREA (Below Dataframe) ---
             col_charts, col_actions, col_del = st.columns([2, 2, 1])
@@ -759,7 +914,8 @@ with tab_history:
                     ops_data = []
                     with st.spinner("Fetching charts..."):
                         # Create a map for reliable lookup within the same rendering cycle
-                        id_map = {i: row["id"] for i, row in df_display.iterrows()}
+                        id_map = {i: row["id"] for i, row in df_ok.iterrows()}
+
                         
                         for idx in selected_indices:
                             try:
@@ -773,8 +929,9 @@ with tab_history:
                                 if op:
                                     st.toast(f"Loading data for {op.symbol}...", icon="📊")
                                     h_data = get_historical_data(op.symbol, period="2y")
+                                    h_data = normalize_yfinance_df(h_data, op.symbol)
                                     
-                                    if h_data.empty:
+                                    if h_data is None or h_data.empty:
                                         st.warning(f"Connection issue or no data available for {op.symbol} via Yahoo Finance.")
                                     else:
                                         ops_data.append({
@@ -828,6 +985,7 @@ with tab_history:
                                     )
                                     
                                     h_data = get_historical_data(op.symbol, period="2y")
+                                    h_data = normalize_yfinance_df(h_data, op.symbol)
                                     full_content = f"# Analysis Report: {op.symbol}\n\n{content}\n\n---"
                                     
                                     reports_data.append({

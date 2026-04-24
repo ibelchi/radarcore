@@ -3,56 +3,56 @@ import numpy as np
 
 class UniverseFilter:
     """
-    Filtre universal previ a qualsevol escaneig de compra.
-    Elimina accions no aptes per falta de liquiditat, historial, market cap, o recuperació de preu.
+    Universal filter prior to any buy scan.
+    Removes stocks not suitable due to lack of liquidity, history, market cap, or price recovery.
 
-    NOTA DIVERSIFICACIÓ SECTORIAL:
-    Implementar a l'orquestrador: després de filtrar tot l'univers, agrupar per info_data['sector'],
-    ordenar per score i tallar a 25 per grup.
+    SECTOR DIVERSIFICATION NOTE:
+    Implement in the orchestrator: after filtering the entire universe, group by info_data['sector'],
+    sort by score and cut to 25 per group.
     """
 
     def _check_zombie_criterion(self,
                                  hist_data: pd.DataFrame
                                  ) -> dict:
         """
-        Retorna {"passes": bool, "reason": str}
+        Returns {"passes": bool, "reason": str}
         
-        Un ticker és zombie si NO té cap episodi de:
-          - drawdown >= 20% des d'un màxim local
-          - seguit d'un rebote >= 50% d'aquell drawdown
-          - ocorregut en els últims 24 mesos (504 sessions)
+        A ticker is zombie if it has NO episodes of:
+          - drawdown >= 20% from a local high
+          - followed by a rebound >= 50% of that drawdown
+          - occurring in the last 24 months (504 sessions)
         
-        Si té aquest episodi recentment: PASSA (swing vàlid)
-        Si només té episodis antics (>24m): ZOMBIE
-        Si no té cap episodi: ZOMBIE
+        If it has this episode recently: PASS (valid swing)
+        If it only has old episodes (>24m): ZOMBIE
+        If it has no episodes: ZOMBIE
         """
         import numpy as np
         
         try:
-            # Finestra màxima: últims 5 anys o tot l'historial
+            # Max window: last 5 years or all history
             max_window = min(252 * 5, len(hist_data))
             data = hist_data.tail(max_window).copy()
             
-            # Finestra recent: últims 24 mesos
+            # Recent window: last 24 months
             recent_window = min(504, len(data))
             
             passes_recent = False
             passes_old = False
             
-            # Analitza finestres rodants de 252 dies
+            # Analyze rolling windows of 252 days
             window_size = 252
-            step = 63  # cada trimestre
+            step = 63  # every quarter
             
             for start in range(0, len(data) - window_size,
                                step):
                 window = data.iloc[start:start + window_size]
                 
-                # Màxim de la primera meitat
+                # High of the first half
                 first_half = window.iloc[:126]
                 max_price = first_half["High"].max()
                 max_idx = first_half["High"].idxmax()
                 
-                # Mínim de la segona meitat
+                # Low of the second half
                 second_half = window.iloc[126:]
                 min_price = second_half["Low"].min()
                 min_idx = second_half["Low"].idxmin()
@@ -65,7 +65,7 @@ class UniverseFilter:
                 if drawdown < 0.20:
                     continue
                 
-                # Preu al final de la finestra
+                # Price at the end of the window
                 end_price = window["Close"].iloc[-1]
                 recovery_range = max_price - min_price
                 
@@ -75,8 +75,8 @@ class UniverseFilter:
                 recovery = (end_price - min_price) / recovery_range
                 
                 if recovery >= 0.50:
-                    # És un episodi vàlid — és recent?
-                    # Comprova si el mínim és dins dels últims 24m
+                    # It's a valid episode — is it recent?
+                    # Check if the low is within the last 24m
                     position_from_end = len(data) - (
                         data.index.get_loc(min_idx)
                         if min_idx in data.index
@@ -85,7 +85,7 @@ class UniverseFilter:
                     
                     if position_from_end <= 504:
                         passes_recent = True
-                        break  # Trobat episodi recent vàlid
+                        break  # Found recent valid episode
                     else:
                         passes_old = True
             
@@ -106,7 +106,7 @@ class UniverseFilter:
                 }
         
         except Exception as e:
-            # En cas d'error, benefici del dubte
+            # In case of error, benefit of the doubt
             return {
                 "passes": True,
                 "reason": f"Zombie check skipped (error: {str(e)[:50]})"
@@ -122,74 +122,74 @@ class UniverseFilter:
             "passed_criteria": []
         }
 
-        # Comprovació de seguretat bàsica
+        # Basic safety check
         if hist_data is None or hist_data.empty:
-            result["reason"] = "Poca o cap data històrica disponible"
+            result["reason"] = "Little or no historical data available"
             return result
         
         current_price = hist_data['Close'].iloc[-1]
 
-        # 1. VOLUM
+        # 1. VOLUME
         try:
             vol_20d = hist_data['Volume'].tail(20).mean()
             if vol_20d >= 500_000 or (vol_20d * current_price) >= 20_000_000:
-                result["passed_criteria"].append("Volum i liquiditat aptes")
+                result["passed_criteria"].append("Adequate volume and liquidity")
             else:
-                result["reason"] = "Volum insuficient"
+                result["reason"] = "Insufficient volume"
                 return result
         except Exception as e:
-            result["passed_criteria"].append(f"Volum (ignorat per error: {e})")
+            result["passed_criteria"].append(f"Volume (ignored by error: {e})")
 
-        # 2. HISTORIAL
+        # 2. HISTORY
         try:
-            # Mínim 6 mesos de dades (molt més permissiu)
+            # Minimum 6 months of data (much more permissive)
             if len(hist_data) < 126:
                 result["reason"] = "Insufficient history (<6 months)"
                 return result
             
-            result["passed_criteria"].append("Historial suficient (>= 6 mesos)")
+            result["passed_criteria"].append("Sufficient history (>= 6 months)")
         except Exception as e:
-            result["passed_criteria"].append(f"Historial (ignorat per error: {e})")
+            result["passed_criteria"].append(f"History (ignored by error: {e})")
 
         # 3. MARKET CAP
         try:
             mcap = info_data.get("market_cap", 0)
             if mcap >= 2_000_000_000:
-                result["passed_criteria"].append("Market cap apte")
+                result["passed_criteria"].append("Market cap adequate")
             else:
-                result["reason"] = "Market cap insuficient (<2B$)"
+                result["reason"] = "Insufficient market cap (<2B$)"
                 return result
         except Exception as e:
-            result["passed_criteria"].append(f"Market cap (ignorat per error: {e})")
+            result["passed_criteria"].append(f"Market cap (ignored by error: {e})")
 
-        # 4. PREU MÍNIM
+        # 4. MINIMUM PRICE
         try:
             if current_price > 5.0:
-                result["passed_criteria"].append("Preu > $5")
+                result["passed_criteria"].append("Price > $5")
             else:
                 result["reason"] = "Penny stock"
                 return result
         except Exception as e:
-            result["passed_criteria"].append(f"Preu mínim (ignorat per error: {e})")
+            result["passed_criteria"].append(f"Minimum price (ignored by error: {e})")
 
-        # 5. CRITERI ZOMBIE (clau de Trazo)
+        # 5. ZOMBIE CRITERION (Trazo key)
         zombie_check = self._check_zombie_criterion(hist_data)
         if not zombie_check["passes"]:
             result["reason"] = zombie_check["reason"]
             return result
         result["passed_criteria"].append("zombie_check")
 
-        # 6. PREU VS ATH HISTÒRIC
+        # 6. PRICE VS HISTORICAL ATH
         try:
             ath = hist_data['High'].max()
             if current_price >= ath * 0.10:
-                result["passed_criteria"].append("Preu vs ATH apte")
+                result["passed_criteria"].append("Price vs ATH adequate")
             else:
-                result["reason"] = "Preu >90% per sota del màxim històric"
+                result["reason"] = "Price >90% below all-time high"
                 return result
         except Exception as e:
-            result["passed_criteria"].append(f"Preu vs ATH històric (ignorat per error: {e})")
+            result["passed_criteria"].append(f"Price vs historical ATH (ignored by error: {e})")
 
-        # Si supera tots els filtres, esdevé elegible
+        # If it passes all filters, it becomes eligible
         result["eligible"] = True
         return result

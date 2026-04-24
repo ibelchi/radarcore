@@ -49,7 +49,9 @@ class MarketScanner:
         spy_data = pd.DataFrame()
         try:
             spy_data = get_historical_data("SPY", period="2y")
-            if spy_data.empty:
+            from src.utils.data_utils import normalize_yfinance_df
+            spy_data = normalize_yfinance_df(spy_data, "SPY")
+            if spy_data is None or spy_data.empty:
                 logger.warning("Could not download SPY data. Relative market analysis will be disabled.")
             else:
                 logger.info("SPY data downloaded successfully for market context.")
@@ -106,7 +108,7 @@ class MarketScanner:
                             hist_data = get_historical_data(sym)
                             time.sleep(1.0) # Additional delay for individual fallback
 
-                        # Verifica immediatament després de la descàrrega:
+                        # Verify immediately after download:
                         from src.utils.data_utils import normalize_yfinance_df
                         hist_data = normalize_yfinance_df(hist_data, sym)
                         if hist_data is None or hist_data.empty or "Close" not in hist_data.columns:
@@ -127,11 +129,11 @@ class MarketScanner:
                                 if scan_logger:
                                     scan_logger.log(sym, "UNIVERSE_FILTER", "SKIP", uf_result.get("reason", ""))
                                 if on_opportunity_found:
-                                    on_opportunity_found(sym, hist_data, {"is_opportunity": False, "reason": "Univers: " + uf_result.get("reason", "")})
+                                    on_opportunity_found(sym, hist_data, {"is_opportunity": False, "reason": "Universe: " + uf_result.get("reason", "")})
                                 continue
                             else:
                                 if scan_logger:
-                                    scan_logger.log(sym, "UNIVERSE_FILTER", "PASS", "Criteris de liquiditat i historial correctes")
+                                    scan_logger.log(sym, "UNIVERSE_FILTER", "PASS", "Liquidity and history criteria correct")
 
                         # 0. L-BASE Detection
                         lbase_res = lbase_det.analyze(hist_data)
@@ -142,31 +144,46 @@ class MarketScanner:
                             # Add some note to the DB item manually if we want
                             w_item = db.query(Watchlist).filter(Watchlist.symbol == sym).first()
                             if w_item:
-                                w_item.notes = "L-BASE Detectat automàticament"
+                                w_item.notes = "L-BASE Automatically detected"
                                 w_item.active = True
                             db.commit()
 
                             if scan_logger:
-                                scan_logger.log(sym, "L-BASE", "SKIP", "Mogut a Watchlist separada.")
+                                scan_logger.log(sym, "L-BASE", "SKIP", "Moved to separate Watchlist.")
                             if on_opportunity_found:
-                                on_opportunity_found(sym, hist_data, {"is_opportunity": False, "reason": "L-BASE enviat a watchlist"})
+                                on_opportunity_found(sym, hist_data, {"is_opportunity": False, "reason": "L-BASE sent to watchlist"})
                             continue
                             
-                        # Mòdul Sistèmic i Semàfor (S'avaluen aquí però els resultats seran agregats només si l'estratègia fa pass)
+                        # Systemic and Semaphore modules (Evaluated here but results will be added only if the strategy passes)
                         sys_res = sys_filter.analyze(hist_data, spy_data)
                         sem_res = phase_sem.analyze(hist_data)
 
                         # Execute plugin strategy logic
                         result = strategy.analyze(sym, hist_data, info_data, config, spy_hist_data=spy_data)
                         if result.get("is_opportunity"):
-                            # 1. Integració del Classificador de Patrons i Fase
+                            # 1. Pattern and Phase Classifier Integration
                             try:
                                 pattern_result = classifier.classify_with_score(hist_data)
                                 phase_result = classifier.analyze_phase(hist_data)
                                 
-                                # Enriquir les mètriques amb el patró i la fase
+                                # RSI
+                                delta = hist_data["Close"].diff()
+                                gain = delta.clip(lower=0).rolling(14).mean()
+                                loss = (-delta.clip(upper=0)).rolling(14).mean()
+                                rs = gain / loss
+                                rsi_series = 100 - (100 / (1 + rs))
+                                rsi_val = round(float(rsi_series.iloc[-1]), 1)
+                                
+                                # Vol ratio 3M
+                                vol_avui = float(hist_data["Volume"].iloc[-1])
+                                vol_mitja_3m = float(hist_data["Volume"].tail(63).mean())
+                                vol_ratio = round(vol_avui / vol_mitja_3m if vol_mitja_3m > 0 else 1.0, 2)
+                                
+                                # Enrich metrics with pattern and phase
                                 metrics = result.get("metrics", {})
                                 metrics.update({
+                                    "rsi_14": rsi_val,
+                                    "vol_ratio_3m": vol_ratio,
                                     "bucket": pattern_result["bucket"],
                                     "bucket_score": pattern_result.get("bucket_score", 0),
                                     "subtype": pattern_result.get("subtype", ""),
@@ -176,14 +193,15 @@ class MarketScanner:
                                     "era_sequence": pattern_result.get("era_sequence", []),
                                     "pivot_points": pattern_result.get("pivot_points", [])
                                 })
-                                # Enriquir amb les dades dels nous mòduls independents
+                                # Enrich with data from new independent modules
                                 metrics.update({
                                     "is_systemic_new": sys_res.get("is_systemic", False),
                                     "systemic_relative_drop": sys_res.get("relative_drop_pct", 0.0),
                                     "phase_emoji": sem_res.get("phase_emoji", "⚪"),
-                                    "phase_name_new": sem_res.get("phase_name", "INDECISIÓ")
+                                    "phase_name_new": sem_res.get("phase_name", "INDECISION")
                                 })
                                 result["metrics"] = metrics
+                                print(f"[{sym}] RSI={metrics.get('rsi_14')} VOL={metrics.get('vol_ratio_3m')}")
                             except Exception as e:
                                 logger.error(f"[{sym}] PatternClassifier error: {e}")
 
@@ -194,7 +212,7 @@ class MarketScanner:
                             
                             logger.info(f"-> SUCCESS {sym} | Conf: {result.get('confidence')}%")
                             
-                            # 2. EXTRA FETCH (Info detallada i earnings per les oportunitats)
+                            # 2. EXTRA FETCH (Detailed info and earnings for opportunities)
                             detailed = get_detailed_info(sym)
                             from src.data.earnings_fetcher import get_earnings_dates
                             earns = get_earnings_dates(sym)
@@ -207,7 +225,7 @@ class MarketScanner:
                                 "past_earnings": earns.get("past", [])
                             })
 
-                            # 3. GUARDAT A LA BASE DE DADES
+                            # 3. SAVED TO DATABASE
                             op = Opportunity(
                                 symbol=sym,
                                 company_name=detailed.get("short_name") or info_data.get("short_name") or sym,
@@ -225,7 +243,7 @@ class MarketScanner:
                             db.add(op)
                             db.commit()
                         else:
-                            # CAS DE DESCART: Només registrem al scan_logger
+                            # DISCARD CASE: Only logged to scan_logger
                             if scan_logger:
                                 scan_logger.log(sym, "STRATEGY", "SKIP", result.get("reason", "Filtered by strategy"))
                             
