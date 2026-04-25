@@ -379,7 +379,8 @@ with tab_scanner:
         st.divider()
         st.write("Analyze any ticker immediately regardless of current scanner results.")
         manual_ticker = st.text_input("Enter Ticker (e.g., TSLA, SAN.MC):", key="scan_manual_ticker").upper()
-        manual_research_btn = st.button("Research Ticker", type="primary", key="btn_research_manual")
+        manual_research_btn = st.button("Research Ticker", type="primary", key="btn_research_manual", disabled=True)
+        st.caption("🚧 **Under review** — AI research is temporarily unavailable while we improve the analysis quality.", unsafe_allow_html=False)
         
     with col_strat:
         st.subheader("Active Configuration")
@@ -1037,9 +1038,10 @@ with tab_history:
                 )
             with col_actions:
                 generate_batch = st.button(
-                    "Generate Reports", 
-                    type="primary", 
-                    use_container_width=True
+                    "Generate Reports",
+                    type="primary",
+                    use_container_width=True,
+                    disabled=True
                 )
             with col_del:
                 if st.button("Clear History", key="btn_clear_hist", use_container_width=True):
@@ -1305,28 +1307,21 @@ with tab_history:
 # --- TAB KNOWLEDGE (RAG) ---
 with tab_knowledge:
     st.header("Investor Knowledge Base")
-    st.write("Upload books, methods, or notes to educate the AI for your reports.")
-    
-    pdf_docs = st.file_uploader("Upload PDF books here", accept_multiple_files=True, type=['pdf'])
-    if st.button("Process & Inject Knowledge"):
-        if pdf_docs:
-            with st.spinner("Fragmenting and vectorizing (FAISS + Google Embeddings)..."):
-                eng = RAGEngine()
-                for pdf_file in pdf_docs:
-                    # Save temporary file
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-                        tmp.write(pdf_file.getvalue())
-                        tmp_path = tmp.name
-                    
-                    ok = eng.process_pdf(tmp_path)
-                    os.unlink(tmp_path)
-                    
-                    if ok:
-                        st.success(f"Document '{pdf_file.name}' indexed successfully.")
-                    else:
-                        st.error(f"Failed to index '{pdf_file.name}'.")
-        else:
-            st.warning("Please select at least one document.")
+    st.warning(
+        "🚧 **Under Review** — The AI Knowledge Base (RAG) is temporarily unavailable "
+        "while we improve the quality and accuracy of the document indexing pipeline. "
+        "This feature will be re-enabled in a future version."
+    )
+    st.divider()
+    # --- DISABLED UI (preserved for future re-activation) ---
+    with st.container():
+        pdf_docs = st.file_uploader(
+            "Upload PDF books here",
+            accept_multiple_files=True,
+            type=['pdf'],
+            disabled=True
+        )
+        st.button("Process & Inject Knowledge", disabled=True)
 
 # --- TAB CONFIG ---
 with tab_config:

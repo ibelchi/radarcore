@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.1] - 2026-04-25
+### Changed
+- **AI Features — Under Review**: Temporarily disabled "Research Ticker", "Generate Reports", and the "Knowledge Base (RAG)" tab while improving analysis quality. All features remain visible with a clear 🚧 status message and will be re-enabled in a future version.
+
+---
+
 ## [1.3.0] - 2026-04-25
 ### Added
 - **Configuration System**: New "⚙️ Configuration" tab allowing live tuning of scanner parameters and weights.
