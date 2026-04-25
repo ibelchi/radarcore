@@ -248,7 +248,8 @@ with st.sidebar:
     st.divider()
 
     st.subheader("AI Configuration")
-    ai_provider = st.radio("AI Provider", ["Google Gemini", "OpenAI"], index=0)
+    st.caption("🚧 AI features are under review — these settings have no effect in the current version.")
+    ai_provider = st.radio("AI Provider", ["Google Gemini", "OpenAI"], index=0, disabled=True)
     
     if ai_provider == "Google Gemini":
         models = ["gemini-flash-latest", "gemini-pro-latest", "gemini-3.1-pro-preview", "gemini-2.5-flash", "gemini-2.0-flash"]
