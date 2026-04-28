@@ -23,10 +23,10 @@
 ## Requirements
 
 * Python 3.9+
-* API Key:
+* **API Keys (Optional - for future AI/Research features):**
     * **Google Gemini API Key** (for Gemini models).
     * **OpenAI API Key** (for GPT models).
-    * *Set them in `.env` or input them directly into the UI.*
+    * *Set them in `.env` or input them directly into the UI when enabled.*
 
 ## Installation
 
@@ -38,7 +38,7 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-1. Create a `.env` file in the root directory and add your key:
+1. **(Optional)** Create a `.env` file in the root directory if you want to use AI features in the future:
    ```env
    GOOGLE_API_KEY=your_api_key_here
    ```
@@ -65,7 +65,12 @@ Learn how RadarCore thinks and make better investment decisions:
 
 ## Future Roadmap
 
-> ⚠️ **Note:** The AI features (Report Generation & RAG Engine) are currently undergoing a major refactor to improve accuracy and are temporarily disabled in the latest release.
+> [!NOTE]
+> **🇬🇧 English:** The AI features (Report Generation & RAG Engine) are currently undergoing a major refactor to improve accuracy and are temporarily disabled in the latest release.
+>
+> **🏴󠁥󠁳󠁣󠁴󠁿 Català:** Les funcions d'IA (Generació d'Informes i Motor RAG) s'estan refactoritzant actualment per millorar-ne la precisió i estan desactivades temporalment en l'última versió.
+>
+> **🇪🇸 Español:** Las funciones de IA (Generación de Informes y Motor RAG) se están refactorizando actualmente para mejorar su precisión y están desactivadas temporalmente en la última versión.
 
 - **Enhancing AI Report precision (v2.0):** Improved research reports and RAG (Retrieval-Augmented Generation) capabilities to personalize the AI with your own investment philosophy.
 - **Advanced Backtesting:** Full historical simulation module to validate strategies over multi-year periods.
@@ -77,5 +82,5 @@ Learn how RadarCore thinks and make better investment decisions:
 
 ### Acknowledgments and Credits
 This software has been developed thanks to the inspiration from the work of Dani Sánchez-Crespo (https://www.skool.com/decodecore) and David Bastidas (https://www.davidbastidas.com/) in addition to their collaboration.
-This software has been programmed with a pedagogical intention and thanks to Gemini and Claude.
+This software has been programmed with a pedagogical intention and using AI assistants (Gemini and Claude) as coding partners.
 
